@@ -21,19 +21,28 @@ type Client interface {
 	//Query returns the default query to use for all requests
 	//An empty url.Values map should be returned if none has been set.
 	Query() url.Values
-	//SetQuery sets the default queries to use for all requests
+
+	//SetQuery sets the default query to use for all requests
 	SetQuery(url.Values)
 
 	//SetBaseUrl sets the base url to use for all requests
 	//If you want to use a different base url then you must
-	//create a new client with the new base url. Can call
+	//create a new client with the new base url. Call
 	//CloneWithNewBaseUrl( url ) to get a clone of this
 	//client's settings but with a new base url.
 	//An error should be returned if the url is unsupported,
 	//for example, using an inadequate scheme. Each implementation
 	//can support different url types.
+	//If you wish to use a username/password combination, set
+	//the userinfo on the url. It will be used during requests.
+	//To use one client with credentials and another without,
+	//use CloneWithNewBaseUrl  and then change the base url.
 	SetBaseUrl(*url.URL) error
 
+	//Clones the client with everything the old client had
+	//except for a new base url. The two clients should be
+	//independent of each other and can be changed
+	//without affecting each other.
 	CloneWithNewBaseUrl(*url.URL) Client
 
 	//GetHttpClient returns the current http.Client being used
@@ -46,11 +55,15 @@ type Client interface {
 	SetHttpClient(*http.Client)
 
 	//SetMarshaler sets the marshal function to be used
-	//to marshal
-	SetMarshaler(func(interface{}) ([]byte, error))
+	//to marshal the request bodies for requests
+	//Doesn't have to mirror the Unmarshaler. Send plain text, get back json
+	//Default is a json marshaler
+	SetMarshaler(MarshalerFunc)
 	//SetUnmarshaler sets the unmarshal function to be used
-	//to unmarshal the body of the REST response
-	SetUnmarshaler(func([]byte, interface{}) error)
+	//to unmarshal the response body for responses
+	//Doesn't have to mirror the Marshaler. Send XML, get back json
+	//Default is a json unmarshaler
+	SetUnmarshaler(UnmarshalerFunc)
 
 	//AddRequestMutator adds a mutator that the request will be
 	//passed through before executing the request. All RequestMutators
@@ -62,7 +75,7 @@ type Client interface {
 	//passed through after the server responds. All ResponseMutators
 	//are called BEFORE the Unmarshaler is used.
 	//ResponseMutators should be called in the order they were added
-	AddResponseMutator(RequestMutator) Client
+	AddResponseMutator(ResponseMutator) Client
 
 	//RemoveRequestMutator removes a request mutator
 	RemoveRequestMutator(RequestMutator) Client
@@ -70,41 +83,53 @@ type Client interface {
 	RemoveResponseMutator(RequestMutator) Client
 
 	//Returns the RequestMutators
-	RequestMutator() []RequestMutator
+	RequestMutators() []RequestMutator
 	//Returns the ResponseMutators
-	ResponseMutator() []ResponseMutator
+	ResponseMutators() []ResponseMutator
 
+	//Get performs a get request with the base url plus the path appended to it. You can send query values and
+	//supply a successResult that will be populated if the http response has a return code of 300.
+	//errorResult is populated if the error code is 400 or more
+	//Returns the raw http.Response and error similar to Do method of http.Client
 	Get(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
+
+	//Post performs a post request with the base url plus the path appended to it. You can send query values and
+	//supply a successResult that will be populated if the http response has a return code of 300.
+	//errorResult is populated if the error code is 400 or more
+	//With post you can also provide a post body.
+	//Returns the raw http.Response and error similar to Do method of http.Client
 	Post(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+
+	//Patch performs a patch request with the base url plus the path appended to it. You can send query values and
+	//supply a successResult that will be populated if the http response has a return code of 300.
+	//errorResult is populated if the error code is 400 or more
+	//With patch you can also provide a patch body.
+	//Returns the raw http.Response and error similar to Do method of http.Client
 	Patch(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
+	//Head performs a head request with the base url plus the path appended to it.
+	//supply a successResult that will be populated if the http response has a return code of 300.
+	//errorResult is populated if the error code is 400 or more
+	//Returns the raw http.Response and error similar to Do method of http.Client
 	Head(path string, successResult interface{}, errorResultg interface{}) (*http.Response, error)
+
+	//Option performs an option request with the base url plus the path appended to it.
+	//supply a successResult that will be populated if the http response has a return code of 300.
+	//errorResult is populated if the error code is 400 or more
+	//Returns the raw http.Response and error similar to Do method of http.Client
 	Options(path string, successResult interface{}, errorResult interface{}) (*http.Response, error)
+
+	//Delete performs an delete request with the base url plus the path appended to it.
+	//supply a successResult that will be populated if the http response has a return code of 300.
+	//errorResult is populated if the error code is 400 or more
+	//Returns the raw http.Response and error similar to Do method of http.Client
 	Delete(path string, successResult interface{}, errorResult interface{}) (*http.Response, error)
 }
 
+type MarshalerFunc func(v interface{}) ([]byte, error)
+type UnmarshalerFunc func(d []byte, v interface{}) error
+
+//RequestMutators are called before the request is made but after the marshaller function has been
+//called.
 type RequestMutator func(*http.Request) error
 type ResponseMutator func(*http.Response) error
-
-//clone will clone the url you pass in
-//with a deep copy
-func cloneUrl(u *url.URL) *url.URL {
-	var userInfo *url.Userinfo
-	if u.User != nil {
-		if p, ok := u.User.Password(); ok {
-			userInfo = url.UserPassword(u.User.Username(), p)
-		} else {
-			userInfo = url.User(u.User.Username())
-		}
-	}
-
-	return &url.URL{
-		Scheme:   u.Scheme,
-		Opaque:   u.Opaque,
-		User:     userInfo,
-		Host:     u.Host,
-		Path:     u.Path,
-		RawQuery: u.RawQuery,
-		Fragment: u.Fragment,
-	}
-}
