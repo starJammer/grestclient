@@ -1,6 +1,11 @@
 package grestclient
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -69,18 +74,18 @@ type Client interface {
 	//passed through before executing the request. All RequestMutators
 	//are called AFTER the Marshaler is used.
 	//RequestMutators should be called in the order they were added
-	AddRequestMutator(RequestMutator) Client
+	AddRequestMutators(...RequestMutator) Client
 
 	//AddResponseMutator adds a mutator that the response will be
 	//passed through after the server responds. All ResponseMutators
 	//are called BEFORE the Unmarshaler is used.
 	//ResponseMutators should be called in the order they were added
-	AddResponseMutator(ResponseMutator) Client
+	AddResponseMutators(...ResponseMutator) Client
 
 	//RemoveRequestMutator removes a request mutator
-	RemoveRequestMutator(RequestMutator) Client
+	SetRequestMutators(...RequestMutator) Client
 	//RemoveResponseMutator removes a response mutator
-	RemoveResponseMutator(RequestMutator) Client
+	SetResponseMutators(...RequestMutator) Client
 
 	//Returns the RequestMutators
 	RequestMutators() []RequestMutator
@@ -126,8 +131,54 @@ type Client interface {
 	Delete(path string, successResult interface{}, errorResult interface{}) (*http.Response, error)
 }
 
-type MarshalerFunc func(v interface{}) ([]byte, error)
-type UnmarshalerFunc func(d []byte, v interface{}) error
+//MarshalerFunc takes something and converts it into a
+//io.ReadCloser that can be used for the request body
+type MarshalerFunc func(v interface{}) (io.ReadCloser, error)
+
+//UnmarshalerFunc takes the response body and converts it into
+//something you can use.
+type UnmarshalerFunc func(body io.ReadCloser, v interface{}) error
+
+func ByteSliceToReadCloser(b []byte) (io.ReadCloser, error) {
+	if b == nil {
+		return nil, errors.New("ReadCloserFromByteSlice received a nil byte slice.")
+	}
+
+	buf := bytes.NewBuffer(b)
+	return ioutil.NopCloser(buf), nil
+}
+
+func StringToReadCloser(s string) (io.ReadCloser, error) {
+	buf := bytes.NewBufferString(s)
+	return ioutil.NopCloser(buf), nil
+}
+
+func JsonMarshalerFunc(v interface{}) (io.ReadCloser, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	body, err := ByteSliceToReadCloser(b)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+func JsonUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
+	b, err := ioutil.ReadAll(body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(b, v)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 //RequestMutators are called before the request is made but after the marshaller function has been
 //called.

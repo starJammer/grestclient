@@ -40,16 +40,6 @@ type client struct {
 	unmarshaler UnmarshalerFunc
 }
 
-func (c *client) AddRequestMutator(rm RequestMutator) Client {
-	c.reqMutators = append(c.reqMutators, rm)
-	return c
-}
-
-func (c *client) AddResponseMutator(rm ResponseMutator) Client {
-	c.resMutators = append(c.resMutators, rm)
-	return c
-}
-
 func (c *client) Headers() http.Header {
 	if c.headers == nil {
 		c.headers = make(http.Header)
@@ -72,6 +62,89 @@ func (c *client) SetQuery(q url.Values) {
 	c.query = q
 }
 
+func (c *client) AddRequestMutators(rm ...RequestMutator) Client {
+	c.reqMutators = append(c.reqMutators, rm...)
+	return c
+}
+
+func (c *client) AddResponseMutators(rm ...ResponseMutator) Client {
+	c.resMutators = append(c.resMutators, rm...)
+	return c
+}
+
+func (c *client) SetRequestMutators(rm ...ResponseMutator) Client {
+	c.resMutators = rm
+	return c
+}
+
+func (c *client) SetResponseMutators(rm ...ResponseMutator) Client {
+	c.resMutators = rm
+	return c
+}
+
+func (c *client) RequestMutators() []RequestMutator {
+	return c.reqMutators
+}
+
+func (c *client) ResponseMutators() []ResponseMutator {
+	return c.resMutators
+}
+
+func (c *client) Get(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+
+}
+
+func (c *client) Post(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+
+}
+
+func (c *client) Patch(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+
+}
+
+func (c *client) Head(path string, successResult interface{}, errorResultg interface{}) (*http.Response, error) {
+
+}
+
+func (c *client) Options(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+
+}
+
+func (c *client) Delete(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+
+}
+
+func (c *client) do(r *http.Request) (*http.Response, error) {
+	var err error
+	if c.RequestMutators() != nil {
+		for _, m := range c.RequestMutators() {
+			err = m(r)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var response *http.Response
+	client := c.GetHttpClient()
+
+	response, err = client.Do(r)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.ResponseMutators() != nil {
+		var err error
+		for _, m := range c.ResponseMutators() {
+			err = m(response)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return response, nil
+}
+
 func (c *client) SetBaseUrl(u *url.URL) error {
 	if u == nil {
 		return errors.New("Please specify a non nil url.")
@@ -83,6 +156,7 @@ func (c *client) SetBaseUrl(u *url.URL) error {
 func (c *client) CloneWithNewBaseUrl(base *url.URL) Client {
 	cc := &client{}
 	cc.base = base
+	//TODO: complete clone method
 	return cc
 }
 
@@ -103,15 +177,6 @@ func (c *client) SetMarshaler(f MarshalerFunc) {
 
 func (c *client) SetUnmarshaler(f UnmarshalerFunc) {
 	c.unmarshaler = f
-}
-
-func (c *client) RemoveRequestMutator(rm RequestMutator) Client {
-	return c
-}
-
-func (c *client) RemoveResponseMutator(rm RequestMutator) Client {
-
-	return c
 }
 
 func New(base *url.URL) (Client, error) {
