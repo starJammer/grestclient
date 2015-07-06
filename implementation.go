@@ -2,6 +2,7 @@ package grestclient
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -72,8 +73,8 @@ func (c *client) AddResponseMutators(rm ...ResponseMutator) Client {
 	return c
 }
 
-func (c *client) SetRequestMutators(rm ...ResponseMutator) Client {
-	c.resMutators = rm
+func (c *client) SetRequestMutators(rm ...RequestMutator) Client {
+	c.reqMutators = rm
 	return c
 }
 
@@ -91,30 +92,62 @@ func (c *client) ResponseMutators() []ResponseMutator {
 }
 
 func (c *client) Get(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-
+	r, err := c.prepareRequest("GET", path, query, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(r, successResult, errorResult)
 }
 
 func (c *client) Post(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("POST", path, query, postBody)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(r, successResult, errorResult)
+}
 
+func (c *client) Put(path string, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("PUT", path, query, putBody)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(r, successResult, errorResult)
 }
 
 func (c *client) Patch(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-
+	r, err := c.prepareRequest("PATCH", path, query, patchBody)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Head(path string, successResult interface{}, errorResultg interface{}) (*http.Response, error) {
-
+func (c *client) Head(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("HEAD", path, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(r, successResult, errorResult)
 }
 
 func (c *client) Options(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-
+	r, err := c.prepareRequest("OPTIONS", path, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Delete(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-
+func (c *client) Delete(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("DELETE", path, query, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) do(r *http.Request) (*http.Response, error) {
+func (c *client) do(r *http.Request, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	var err error
 	if c.RequestMutators() != nil {
 		for _, m := range c.RequestMutators() {
@@ -128,29 +161,121 @@ func (c *client) do(r *http.Request) (*http.Response, error) {
 	client := c.GetHttpClient()
 
 	response, err = client.Do(r)
+
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 
 	if c.ResponseMutators() != nil {
 		var err error
 		for _, m := range c.ResponseMutators() {
 			err = m(response)
 			if err != nil {
-				return nil, err
+				return response, err
 			}
 		}
 	}
 
+	if c.unmarshaler == nil {
+		c.unmarshaler = StringUnmarshalerFunc
+	}
+
+	//make sure there is a body, or that there might be a body (when it is -1)
+	if response.ContentLength > 0 || response.ContentLength == -1 {
+		if response.StatusCode < 300 && successResult != nil {
+			//success
+			err = c.unmarshaler(response.Body, successResult)
+		} else if response.StatusCode < 600 && errorResult != nil {
+			//error
+			err = c.unmarshaler(response.Body, errorResult)
+		}
+	}
+
+	if err != nil {
+		//we have the response so return it even though unmarshaling might've
+		//produced an error
+		return response, err
+	}
+
 	return response, nil
+}
+
+func (c *client) prepareRequest(
+	method string,
+	path string,
+	query url.Values,
+	body interface{}) (*http.Request, error) {
+
+	var err error
+	reqUrl, err := c.base.Parse(path)
+	if err != nil {
+		return nil, err
+	}
+
+	//set headers
+	headers := setupHeaders(c.headers)
+	//create query
+	query = setupQuery(c.query, query)
+
+	if c.marshaler == nil {
+		c.marshaler = StringMarshalerFunc
+	}
+
+	var readCloserBody io.ReadCloser
+	if body != nil {
+
+		readCloserBody, err = c.marshaler(body)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	r, err := http.NewRequest(method, reqUrl.String(), readCloserBody)
+	if err != nil {
+		return nil, err
+	}
+
+	r.Header = headers
+	r.URL.RawQuery = query.Encode()
+
+	return r, nil
+}
+
+func setupHeaders(headers ...http.Header) http.Header {
+	finalheaders := make(http.Header)
+	for _, current := range headers {
+		for i, v := range current {
+			finalheaders[i] = v
+		}
+	}
+
+	return finalheaders
+}
+
+func setupQuery(queries ...url.Values) url.Values {
+	finalquery := make(url.Values)
+	for _, current := range queries {
+		for i, v := range current {
+			finalquery[i] = v
+		}
+	}
+
+	return finalquery
 }
 
 func (c *client) SetBaseUrl(u *url.URL) error {
 	if u == nil {
 		return errors.New("Please specify a non nil url.")
 	}
+	u.RawQuery = ""
 	c.base = u
 	return nil
+}
+
+func (c *client) BaseUrl() *url.URL {
+	return c.base
 }
 
 func (c *client) CloneWithNewBaseUrl(base *url.URL) Client {
@@ -185,6 +310,7 @@ func New(base *url.URL) (Client, error) {
 		return nil, errors.New("Please specify a non nil url.")
 	}
 	c := &client{}
+	c.base = base
 	c.headers = make(http.Header)
 	c.query = make(url.Values)
 	c.reqMutators = make([]RequestMutator, 0)
