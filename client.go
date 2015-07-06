@@ -16,16 +16,13 @@ type Client interface {
 
 	//Headers returns the default headers that will
 	//be set with every request made with the client.
-	//If none have been set, this should return an empty Header map.
 	Headers() http.Header
 
 	//SetHeaders sets the default headers that will be sent with
 	//every request made with this client.
-	//These headers can be overridden on a per-request-basis
 	SetHeaders(http.Header)
 
 	//Query returns the default query to use for all requests
-	//An empty url.Values map should be returned if none has been set.
 	Query() url.Values
 
 	//SetQuery sets the default query to use for all requests
@@ -166,6 +163,8 @@ type MarshalerFunc func(v interface{}) (io.ReadCloser, error)
 //something you can use.
 type UnmarshalerFunc func(body io.ReadCloser, v interface{}) error
 
+//ByteSliceToReadCloser takes a byte slice and converts it to an
+//io.ReadCloser that can be used as a request/resonse body
 func ByteSliceToReadCloser(b []byte) (io.ReadCloser, error) {
 	if b == nil {
 		return nil, errors.New("ReadCloserFromByteSlice received a nil byte slice.")
@@ -175,11 +174,15 @@ func ByteSliceToReadCloser(b []byte) (io.ReadCloser, error) {
 	return ioutil.NopCloser(buf), nil
 }
 
+//StringToReadCloser takes a string and converts it to an
+//io.ReadCloser that can be used as a request/resonse body
 func StringToReadCloser(s string) (io.ReadCloser, error) {
 	buf := bytes.NewBufferString(s)
 	return ioutil.NopCloser(buf), nil
 }
 
+//JsonMarshalerFunc can be used to marshal request bodies
+//into json
 func JsonMarshalerFunc(v interface{}) (io.ReadCloser, error) {
 	b, err := json.Marshal(v)
 	if err != nil {
@@ -192,6 +195,8 @@ func JsonMarshalerFunc(v interface{}) (io.ReadCloser, error) {
 	return body, nil
 }
 
+//JsonUnmarshalerFunc can be used to unmarshal response bodies
+//from json
 func JsonUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
 	defer body.Close()
 	b, err := ioutil.ReadAll(body)
@@ -208,6 +213,7 @@ func JsonUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
 	return nil
 }
 
+//StringMarshalerFunc can be used to marshal strings into a request.
 func StringMarshalerFunc(v interface{}) (io.ReadCloser, error) {
 	switch t := v.(type) {
 	case fmt.Stringer:
@@ -219,6 +225,7 @@ func StringMarshalerFunc(v interface{}) (io.ReadCloser, error) {
 	return nil, errors.New("Did not know how to use the body as text.")
 }
 
+//StringUnmarshalerFunc can be used to unmarshal strings from a response.
 func StringUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
 	defer body.Close()
 
@@ -247,7 +254,24 @@ func StringUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
 	return errors.New("Did not know how to unmarshal the text coming back.")
 }
 
+//JsonContentTypeMutator sets the Content-Type of the request to be
+//application/json
+func JsonContentTypeMutator(r *http.Request) error {
+	r.Header.Add("Content-Type", "application/json")
+	return nil
+}
+
 //RequestMutators are called before the request is made but after the marshaler function has been
 //called.
 type RequestMutator func(*http.Request) error
 type ResponseMutator func(*http.Response) error
+
+//SetupClientForJson is a convenience method that sets the
+//marshaler and unmarshaler funcs on the client to be the
+//Json funcs in this package. It also sets a request mutator
+//to set the Content-Type to json.
+func SetupForJson(c Client) {
+	c.SetMarshaler(JsonMarshalerFunc)
+	c.SetUnmarshaler(JsonUnmarshalerFunc)
+	c.AddRequestMutators(JsonContentTypeMutator)
+}

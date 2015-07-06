@@ -281,7 +281,14 @@ func (c *client) BaseUrl() *url.URL {
 func (c *client) CloneWithNewBaseUrl(base *url.URL) Client {
 	cc := &client{}
 	cc.base = base
-	//TODO: complete clone method
+	cc.reqMutators = c.reqMutators
+	cc.resMutators = c.resMutators
+	cc.headers = c.headers
+	cc.query = c.query
+	cc.client = c.client
+	cc.marshaler = c.marshaler
+	cc.unmarshaler = c.unmarshaler
+
 	return cc
 }
 
@@ -304,6 +311,8 @@ func (c *client) SetUnmarshaler(f UnmarshalerFunc) {
 	c.unmarshaler = f
 }
 
+//New creates a new grestclient with the base url set
+//to the passed in paramater.
 func New(base *url.URL) (Client, error) {
 
 	if base == nil {
@@ -311,10 +320,6 @@ func New(base *url.URL) (Client, error) {
 	}
 	c := &client{}
 	c.base = base
-	c.headers = make(http.Header)
-	c.query = make(url.Values)
-	c.reqMutators = make([]RequestMutator, 0)
-	c.resMutators = make([]ResponseMutator, 0)
 
 	return c, nil
 }
