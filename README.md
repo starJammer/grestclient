@@ -1,6 +1,6 @@
 # grestclient
 
-A REST client library written in go.
+A REST client library written in go. Still under development. API can change at any time.
 
 ## Introduction
 
