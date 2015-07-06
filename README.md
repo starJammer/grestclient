@@ -49,6 +49,8 @@ package main
 import ( 
     gr "github.com/starJammer/grestclient"
     "net/url"
+    "net/http"
+    "fmt"
 )
 
 func main(){
@@ -71,17 +73,17 @@ func main(){
     //MarshalerFuncs/UnmarshalerFuncs.
 
     //these are the defaults so no need to do this really
-    c.SetMarshaler( StringUnmarshalerFunc )
-    c.SetUnmarshaler( StringUnmarshalerFunc )
+    c.SetMarshaler( gr.StringUnmarshalerFunc )
+    c.SetUnmarshaler( gr.StringUnmarshalerFunc )
 
     //Let's do json
-    c.SetMarshaler( JsonMarshalerFunc )
-    c.SetUnmarshaler( JsonUnmarshalerFunc )
+    c.SetMarshaler( gr.JsonMarshalerFunc )
+    c.SetUnmarshaler( gr.JsonUnmarshalerFunc )
     //makes sure request's Content-Type header has application/json in it.
-    c.AddRequestMutators( JsonContentTypeMutator )
+    c.AddRequestMutators( gr.JsonContentTypeMutator )
 
     //I included a convenience function for the above 3 calls so you can do
-    SetupForJson( c ) //instead of calling them individually, unless you need
+    gr.SetupForJson( c ) //instead of calling them individually, unless you need
     //mixed (un)marshaling or something.
 
     var successResult, errorResult string
