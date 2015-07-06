@@ -278,9 +278,9 @@ func (c *client) BaseUrl() *url.URL {
 	return c.base
 }
 
-func (c *client) CloneWithNewBaseUrl(base *url.URL) Client {
+func (c *client) Clone() Client {
 	cc := &client{}
-	cc.base = base
+	cc.base = cloneUrl(c.base)
 	cc.reqMutators = c.reqMutators
 	cc.resMutators = c.resMutators
 	cc.headers = c.headers
