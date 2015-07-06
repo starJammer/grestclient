@@ -48,8 +48,11 @@ type Client interface {
 	BaseUrl() *url.URL
 
 	//Clones the client with everything the old client had
-	//The two clients should be independent of each other and can be changed
-	//without affecting each other.
+	//Ideally, clones should be independent of the original and can be changed
+	//without affecting the original and vice versa.
+	//This implementation, however, shared the http.Client among clones.
+	//All other 'things' like headers, base url, query, marshalers are separate and
+	//can be adjusted without affecting the original/clones.
 	Clone() Client
 
 	//GetHttpClient returns the current http.Client being used

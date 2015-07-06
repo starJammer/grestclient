@@ -281,15 +281,42 @@ func (c *client) BaseUrl() *url.URL {
 func (c *client) Clone() Client {
 	cc := &client{}
 	cc.base = cloneUrl(c.base)
-	cc.reqMutators = c.reqMutators
-	cc.resMutators = c.resMutators
-	cc.headers = c.headers
-	cc.query = c.query
+
+	cc.reqMutators = make([]RequestMutator, len(c.reqMutators))
+	copy(cc.reqMutators, c.reqMutators)
+
+	cc.resMutators = make([]ResponseMutator, len(c.resMutators))
+	copy(cc.resMutators, c.resMutators)
+
+	cc.headers = headerCopy(c.headers)
+	cc.query = queryCopy(c.query)
 	cc.client = c.client
 	cc.marshaler = c.marshaler
 	cc.unmarshaler = c.unmarshaler
 
 	return cc
+}
+
+func headerCopy(h http.Header) http.Header {
+	if h == nil {
+		return nil
+	}
+	c := make(http.Header, len(h))
+	for i, v := range h {
+		c[i] = v
+	}
+	return c
+}
+
+func queryCopy(q url.Values) url.Values {
+	if q == nil {
+		return nil
+	}
+	c := make(url.Values, len(q))
+	for i, v := range q {
+		c[i] = v
+	}
+	return c
 }
 
 func (c *client) GetHttpClient() *http.Client {

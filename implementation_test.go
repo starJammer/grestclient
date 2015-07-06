@@ -282,6 +282,36 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 
 }
 
+func TestQueryInCallOverridesDefaults(t *testing.T) {
+	firstRequest := true
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if firstRequest {
+			if req.URL.Query().Get("testquery") != "test-override" {
+				t.Fatal("Did not get override query: ", req.URL.Query().Get("testquery"))
+			}
+		} else {
+			if req.URL.Query().Get("testquery") != "test" {
+				t.Fatal("Did not get default query on follow up request: ", req.URL.Query().Get("testquery"))
+			}
+		}
+		firstRequest = false
+	}))
+	defer server.Close()
+
+	base, err := url.Parse(server.URL)
+	client, err := New(base)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client.Query().Add("testquery", "test")
+
+	client.Get("get", url.Values{"testquery": []string{"test-override"}}, nil, nil)
+	client.Get("get", nil, nil, nil)
+
+}
+
 func TestStringMarshaledBody(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		b, err := ioutil.ReadAll(req.Body)
@@ -439,4 +469,54 @@ func TestJsonMarshaledBody(t *testing.T) {
 	if success.Name != "test-result" {
 		t.Fatal("Did not receive expected result.")
 	}
+}
+
+func TestCloneClient(t *testing.T) {
+	originalRequest := 0
+	cloneRequest := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		originalRequest++
+		if originalRequest > 1 {
+			t.Fatal("Got more than one request at original server when we only expected one here.")
+		}
+		if req.Header.Get("X-Which") != "original" {
+			t.Fatal("Got unexpected header from original: ", req.Header.Get("X-Which"))
+		}
+		if req.URL.Query().Get("query") != "original" {
+			t.Fatal("Got unexpected query from original: ", req.URL.Query().Get("X-Which"))
+		}
+	}))
+	defer server.Close()
+	cloneServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		cloneRequest++
+		if cloneRequest > 1 {
+			t.Fatal("Got more than one request at clone server when we only expected one here.")
+		}
+		if req.Header.Get("X-Which") != "clone" {
+			t.Fatal("Got unexpected header from clone: ", req.Header.Get("X-Which"))
+		}
+		if req.URL.Query().Get("query") != "clone" {
+			t.Fatal("Got unexpected query from clone: ", req.URL.Query().Get("X-Which"))
+		}
+	}))
+	defer cloneServer.Close()
+
+	base, err := url.Parse(server.URL)
+	cloneBase, err := url.Parse(cloneServer.URL)
+	client, err := New(base)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client.Headers().Set("X-Which", "original")
+	client.Query().Set("query", "original")
+
+	clone := client.Clone()
+	clone.SetBaseUrl(cloneBase)
+	clone.Headers().Set("X-Which", "clone")
+	clone.Query().Set("query", "clone")
+
+	client.Get("", nil, nil, nil)
+	clone.Get("", nil, nil, nil)
 }
