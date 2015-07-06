@@ -19,15 +19,15 @@ a *Differences* section somewhere.
 
 This package is essentially a small/thin wrapper around http.Client. As
 mentioned, I was using [jmcvetta/napping][1] but I wanted it to work slightly
-differently. Instead of change that package completely and do a pull request
+differently. Instead of changing that package completely and doing a pull request,
 I made my own. The main two differences are that the following:
 
-1. Lets you specify the marshaler to use to marshal the request body and 
+1. `grestclient` lets you specify the marshaler to use to marshal the request body and 
 the unmarshaler to use on the response body.
-2. Lets you specify request/response mutators to execute before the request
+2. `grestclient` lets you specify request/response mutators to execute before the request
 goes out and after the response comes back.
 
-Besides that there are some small things that I did because I prefer it 
+Besides that there are some small things that I made because I prefer it
 this way.
 
 1. When the client is created it stores a base url. So you don't have to
