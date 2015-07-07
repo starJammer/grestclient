@@ -91,7 +91,7 @@ func (c *client) ResponseMutators() []ResponseMutator {
 	return c.resMutators
 }
 
-func (c *client) Get(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) GetP(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	r, err := c.prepareRequest("GET", path, query, nil)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,11 @@ func (c *client) Get(path string, query url.Values, successResult interface{}, e
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Post(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Get(query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	return c.GetP("", query, successResult, errorResult)
+}
+
+func (c *client) PostP(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	r, err := c.prepareRequest("POST", path, query, postBody)
 	if err != nil {
 		return nil, err
@@ -107,7 +111,11 @@ func (c *client) Post(path string, query url.Values, postBody interface{}, succe
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Put(path string, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Post(query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	return c.PostP("", query, postBody, successResult, errorResult)
+}
+
+func (c *client) PutP(path string, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	r, err := c.prepareRequest("PUT", path, query, putBody)
 	if err != nil {
 		return nil, err
@@ -115,7 +123,11 @@ func (c *client) Put(path string, query url.Values, putBody interface{}, success
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Patch(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Put(query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	return c.PutP("", query, putBody, successResult, errorResult)
+}
+
+func (c *client) PatchP(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	r, err := c.prepareRequest("PATCH", path, query, patchBody)
 	if err != nil {
 		return nil, err
@@ -123,7 +135,11 @@ func (c *client) Patch(path string, query url.Values, patchBody interface{}, suc
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Head(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Patch(query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	return c.PatchP("", query, patchBody, successResult, errorResult)
+}
+
+func (c *client) HeadP(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	r, err := c.prepareRequest("HEAD", path, nil, nil)
 	if err != nil {
 		return nil, err
@@ -131,20 +147,31 @@ func (c *client) Head(path string, successResult interface{}, errorResult interf
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Options(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Head(successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	return c.HeadP("", successResult, errorResult)
+}
+
+func (c *client) OptionsP(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	r, err := c.prepareRequest("OPTIONS", path, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
 }
+func (c *client) Options(successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	return c.OptionsP("", successResult, errorResult)
+}
 
-func (c *client) Delete(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) DeleteP(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
 	r, err := c.prepareRequest("DELETE", path, query, nil)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
+}
+
+func (c *client) Delete(query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	return c.DeleteP("", query, successResult, errorResult)
 }
 
 func (c *client) do(r *http.Request, successResult interface{}, errorResult interface{}) (*http.Response, error) {

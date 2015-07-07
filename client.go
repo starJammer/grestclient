@@ -97,64 +97,78 @@ type Client interface {
 	//Returns the ResponseMutators
 	ResponseMutators() []ResponseMutator
 
-	//Get performs a get request with the base url plus the path appended to it. You can send query values and
+	//GetP performs a get request with the base url plus the path appended to it. You can send query values and
 	//supply a successResult that will be populated if the http response has a return code of 300.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Get(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	GetP(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	//Get performs a get to the base url
+	Get(query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Post performs a post request with the base url plus the path appended to it. You can send query values and
+	//PostP performs a post request with the base url plus the path appended to it. You can send query values and
 	//supply a successResult that will be populated if the http response has a return code of 300.
 	//errorResult is populated if the error code is 400 or more
 	//With post you can also provide a post body.
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Post(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	PostP(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	//Post performs a post to the base url
+	Post(query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Put performs a put request with the base url plus the path appended to it. You can send query values and
+	//PutP performs a put request with the base url plus the path appended to it. You can send query values and
 	//supply a successResult that will be populated if the http response has a return code of 300.
 	//errorResult is populated if the error code is 400 or more
 	//With put you can also provide a put body.
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Put(path string, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	PutP(path string, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	//Put performs a put to the base url
+	Put(query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Patch performs a patch request with the base url plus the path appended to it. You can send query values and
+	//PatchP performs a patch request with the base url plus the path appended to it. You can send query values and
 	//supply a successResult that will be populated if the http response has a return code of 300.
 	//errorResult is populated if the error code is 400 or more
 	//With patch you can also provide a patch body.
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Patch(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	PatchP(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	//Patch performs a patch to the base url
+	Patch(query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Head performs a head request with the base url plus the path appended to it.
+	//HeadP performs a head request with the base url plus the path appended to it.
 	//supply a successResult that will be populated if the http response has a return code of 300.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Head(path string, successResult interface{}, errorResultg interface{}) (*http.Response, error)
+	HeadP(path string, successResult interface{}, errorResultg interface{}) (*http.Response, error)
+	//Head performs a head to the base url
+	Head(successResult interface{}, errorResultg interface{}) (*http.Response, error)
 
-	//Option performs an option request with the base url plus the path appended to it.
+	//OptionsP performs an option request with the base url plus the path appended to it.
 	//supply a successResult that will be populated if the http response has a return code of 300.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Options(path string, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	OptionsP(path string, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	//Options performs an option to the base url
+	Options(successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Delete performs an delete request with the base url plus the path appended to it.
+	//DeleteP performs an delete request with the base url plus the path appended to it.
 	//supply a successResult that will be populated if the http response has a return code of 300.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Delete(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	DeleteP(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	//Delete performs a delete to the base url
+	Delete(query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
 }
 
 //MarshalerFunc takes something and converts it into a
