@@ -1,7 +1,5 @@
 /*
-# grestclient
-
-A REST client library written in go.
+A REST client library written in go. Still under development. API can change at any time.
 
 ## Introduction
 
@@ -14,21 +12,21 @@ a *Differences* section somewhere.
 
 ## Installation
 
-`go get https://github.com/starJammer/grestclient`
+go get https://github.com/starJammer/grestclient
 
 ## Description
 
 This package is essentially a small/thin wrapper around http.Client. As
 mentioned, I was using [jmcvetta/napping][1] but I wanted it to work slightly
-differently. Instead of change that package completely and do a pull request
+differently. Instead of changing that package completely and doing a pull request,
 I made my own. The main two differences are that the following:
 
-1. Lets you specify the marshaler to use to marshal the request body and
+1. `grestclient` lets you specify the marshaler to use to marshal the request body and
 the unmarshaler to use on the response body.
-2. Lets you specify request/response mutators to execute before the request
+2. `grestclient` lets you specify request/response mutators to execute before the request
 goes out and after the response comes back.
 
-Besides that there are some small things that I did because I prefer it
+Besides that there are some small things that I made because I prefer it
 this way.
 
 1. When the client is created it stores a base url. So you don't have to
@@ -49,6 +47,8 @@ RequestMutator can help you alter a request about to be executed if need.
 	import (
 		gr "github.com/starJammer/grestclient"
 		"net/url"
+		"net/http"
+		"fmt"
 	)
 
 	func main(){
@@ -71,17 +71,17 @@ RequestMutator can help you alter a request about to be executed if need.
 		//MarshalerFuncs/UnmarshalerFuncs.
 
 		//these are the defaults so no need to do this really
-		c.SetMarshaler( StringUnmarshalerFunc )
-		c.SetUnmarshaler( StringUnmarshalerFunc )
+		c.SetMarshaler( gr.StringUnmarshalerFunc )
+		c.SetUnmarshaler( gr.StringUnmarshalerFunc )
 
 		//Let's do json
-		c.SetMarshaler( JsonMarshalerFunc )
-		c.SetUnmarshaler( JsonUnmarshalerFunc )
+		c.SetMarshaler( gr.JsonMarshalerFunc )
+		c.SetUnmarshaler( gr.JsonUnmarshalerFunc )
 		//makes sure request's Content-Type header has application/json in it.
-		c.AddRequestMutators( JsonContentTypeMutator )
+		c.AddRequestMutators( gr.JsonContentTypeMutator )
 
 		//I included a convenience function for the above 3 calls so you can do
-		SetupForJson( c ) //instead of calling them individually, unless you need
+		gr.SetupForJson( c ) //instead of calling them individually, unless you need
 		//mixed (un)marshaling or something.
 
 		var successResult, errorResult string
@@ -102,6 +102,12 @@ RequestMutator can help you alter a request about to be executed if need.
 							   //This is where any responses with a code less than 300 get unmarshaled to
 			   &errorResult ) //You can pass nil if you want.
 							  //This is where any responses with a code greater than 400 get unmarshaled to
+
+		c.Post( "", //use blank path to perform an operation on just the base url itself
+			   url.Values{},
+			   &postBody,
+			   &successResult,
+			   &errorResult )
 
 
 		//That's it for the most part. You can use the other methods too:
