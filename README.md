@@ -105,6 +105,15 @@ func main(){
            &errorResult ) //You can pass nil if you want.
                           //This is where any responses with a code greater than 400 get unmarshaled to
 
+    c.Post( "", //use blank url to perform an operation on just the base url itself
+           url.Values{}, //you can also pass nil here. these are used in the query portion of the url
+           &postBody, //the post body can be nil if you want. You can pass by reference or by value.
+                      //Using pointers or passing by reference is usually preferenced unless it's simple type
+           &successResult, //you can pass nil here if you want. 
+                           //This is where any responses with a code less than 300 get unmarshaled to
+           &errorResult ) //You can pass nil if you want.
+                          //This is where any responses with a code greater than 400 get unmarshaled to
+
 
     //That's it for the most part. You can use the other methods too:
 
