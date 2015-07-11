@@ -44,7 +44,10 @@ type Client interface {
 	//query parameters
 	SetBaseUrl(*url.URL) error
 
-	//BaseUrl returns the base url being used
+	//BaseUrl returns the base url being used. This implementation
+	//allows you to change the base url here directly but other
+	//implementations might give you a clone so changing it won't affect
+	//the client. In those cases, use SetBaseUrl to change the url.
 	BaseUrl() *url.URL
 
 	//Clones the client with everything the old client had
