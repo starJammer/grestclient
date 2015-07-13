@@ -203,7 +203,6 @@ func JsonMarshalerFunc(v interface{}) (io.ReadCloser, error) {
 //JsonUnmarshalerFunc can be used to unmarshal response bodies
 //from json
 func JsonUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
-	defer body.Close()
 	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		return err
@@ -232,8 +231,6 @@ func StringMarshalerFunc(v interface{}) (io.ReadCloser, error) {
 
 //StringUnmarshalerFunc can be used to unmarshal strings from a response.
 func StringUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
-	defer body.Close()
-
 	if v == nil {
 		return nil
 	}
@@ -266,6 +263,11 @@ func JsonContentTypeMutator(r *http.Request) error {
 	return nil
 }
 
+func JsonAcceptMutator(r *http.Request) error {
+	r.Header.Add("Accept", "application/json")
+	return nil
+}
+
 //RequestMutators are called before the request is made but after the marshaler function has been
 //called.
 type RequestMutator func(*http.Request) error
@@ -279,4 +281,5 @@ func SetupForJson(c Client) {
 	c.SetMarshaler(JsonMarshalerFunc)
 	c.SetUnmarshaler(JsonUnmarshalerFunc)
 	c.AddRequestMutators(JsonContentTypeMutator)
+	c.AddRequestMutators(JsonAcceptMutator)
 }
