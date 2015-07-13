@@ -520,3 +520,25 @@ func TestCloneClient(t *testing.T) {
 	client.Get("", nil, nil, nil)
 	clone.Get("", nil, nil, nil)
 }
+
+func TestPathIsConcatenated(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path != "/base/subpath" {
+			t.Fatal("Proper subpathing is not occurring: ", req.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	base, err := url.Parse(server.URL + "/base")
+	client, err := New(base)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = client.Post("/subpath", nil, nil, nil, nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}

@@ -208,10 +208,8 @@ func (c *client) prepareRequest(
 	body interface{}) (*http.Request, error) {
 
 	var err error
-	reqUrl, err := c.base.Parse(path)
-	if err != nil {
-		return nil, err
-	}
+	reqUrl := cloneUrl(c.base)
+	reqUrl.Path += path
 
 	//set headers
 	headers := setupHeaders(c.headers)
@@ -321,7 +319,7 @@ func queryCopy(q url.Values) url.Values {
 
 func (c *client) GetHttpClient() *http.Client {
 	if c.client == nil {
-		c.client = &http.Client{}
+		c.client = http.DefaultClient
 	}
 	return c.client
 }
