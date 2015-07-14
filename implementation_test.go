@@ -422,7 +422,7 @@ func TestDumbRequestResponseMutators(t *testing.T) {
 
 func TestJsonMarshaledBody(t *testing.T) {
 	type test struct {
-		Name string `json:name`
+		Name string `json:"name"`
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 
