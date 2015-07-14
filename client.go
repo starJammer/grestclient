@@ -162,11 +162,11 @@ type Client interface {
 
 //MarshalerFunc takes something and converts it into a
 //io.ReadCloser that can be used for the request body
-type MarshalerFunc func(v interface{}) (io.ReadCloser, error)
+type MarshalerFunc func(v interface{}) ([]byte, error)
 
 //UnmarshalerFunc takes the response body and converts it into
 //something you can use.
-type UnmarshalerFunc func(body io.ReadCloser, v interface{}) error
+type UnmarshalerFunc func(b []byte, v interface{}) error
 
 //ByteSliceToReadCloser takes a byte slice and converts it to an
 //io.ReadCloser that can be used as a request/resonse body
@@ -188,12 +188,8 @@ func StringToReadCloser(s string) (io.ReadCloser, error) {
 
 //JsonMarshalerFunc can be used to marshal request bodies
 //into json
-func JsonMarshalerFunc(v interface{}) (io.ReadCloser, error) {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-	body, err := ByteSliceToReadCloser(b)
+func JsonMarshalerFunc(v interface{}) ([]byte, error) {
+	body, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
@@ -202,13 +198,9 @@ func JsonMarshalerFunc(v interface{}) (io.ReadCloser, error) {
 
 //JsonUnmarshalerFunc can be used to unmarshal response bodies
 //from json
-func JsonUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
-	b, err := ioutil.ReadAll(body)
-	if err != nil {
-		return err
-	}
+func JsonUnmarshalerFunc(b []byte, v interface{}) error {
 
-	err = json.Unmarshal(b, v)
+	err := json.Unmarshal(b, v)
 
 	if err != nil {
 		return err
@@ -218,27 +210,21 @@ func JsonUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
 }
 
 //StringMarshalerFunc can be used to marshal strings into a request.
-func StringMarshalerFunc(v interface{}) (io.ReadCloser, error) {
+func StringMarshalerFunc(v interface{}) ([]byte, error) {
 	switch t := v.(type) {
 	case fmt.Stringer:
-		return StringToReadCloser(t.String())
+		return []byte(t.String()), nil
 	case string:
-		return StringToReadCloser(t)
+		return []byte(t), nil
 	}
 
 	return nil, errors.New("Did not know how to use the body as text.")
 }
 
 //StringUnmarshalerFunc can be used to unmarshal strings from a response.
-func StringUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
+func StringUnmarshalerFunc(b []byte, v interface{}) error {
 	if v == nil {
 		return nil
-	}
-
-	b, err := ioutil.ReadAll(body)
-
-	if err != nil {
-		return err
 	}
 
 	switch v.(type) {

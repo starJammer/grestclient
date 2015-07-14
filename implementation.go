@@ -1,8 +1,9 @@
 package grestclient
 
 import (
+	"bytes"
 	"errors"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -183,12 +184,19 @@ func (c *client) do(r *http.Request, successResult interface{}, errorResult inte
 
 	//make sure there is a body, or that there might be a body (when it is -1)
 	if response.ContentLength > 0 || response.ContentLength == -1 {
+		//read the body response
+		b, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return response, err
+		}
+
+		//unmarshal it depending on StatusCode
 		if response.StatusCode < 300 && successResult != nil {
 			//success
-			err = c.unmarshaler(response.Body, successResult)
+			err = c.unmarshaler(b, successResult)
 		} else if response.StatusCode < 600 && errorResult != nil {
 			//error
-			err = c.unmarshaler(response.Body, errorResult)
+			err = c.unmarshaler(b, errorResult)
 		}
 	}
 
@@ -220,7 +228,7 @@ func (c *client) prepareRequest(
 		c.marshaler = StringMarshalerFunc
 	}
 
-	var readCloserBody io.ReadCloser
+	var readCloserBody []byte
 	if body != nil {
 
 		readCloserBody, err = c.marshaler(body)
@@ -230,7 +238,7 @@ func (c *client) prepareRequest(
 		}
 	}
 
-	r, err := http.NewRequest(method, reqUrl.String(), readCloserBody)
+	r, err := http.NewRequest(method, reqUrl.String(), bytes.NewBuffer(readCloserBody))
 	if err != nil {
 		return nil, err
 	}
