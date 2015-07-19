@@ -23,12 +23,13 @@ func TestMeetsInterface(t *testing.T) {
 }
 
 func TestStringToReadCloser(t *testing.T) {
-	reader, err := StringToReadCloser("thing")
+	reader := StringToReadLener("thing")
+
+	b, err := ioutil.ReadAll(reader)
+
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	b, err := ioutil.ReadAll(reader)
 
 	if string(b) != "thing" {
 		t.Fatal("ReadCloser not created properly from string.")
@@ -41,7 +42,7 @@ func TestTextMarshalers(t *testing.T) {
 		t.Fatal(err)
 	}
 	var result string
-	err = StringUnmarshalerFunc(r, &result)
+	err = StringUnmarshalerFunc(ioutil.NopCloser(r), &result)
 
 	if err != nil {
 		t.Fatal(err)
@@ -52,7 +53,7 @@ func TestTextMarshalers(t *testing.T) {
 	}
 
 	//passing by value doesn't work
-	err = StringUnmarshalerFunc(r, result)
+	err = StringUnmarshalerFunc(ioutil.NopCloser(r), result)
 	if err == nil {
 		t.Fatal("Expected error about passing by value instead of reference.")
 	}

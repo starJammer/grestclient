@@ -1,7 +1,6 @@
 package grestclient
 
 import (
-	"bytes"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -184,19 +183,14 @@ func (c *client) do(r *http.Request, successResult interface{}, errorResult inte
 
 	//make sure there is a body, or that there might be a body (when it is -1)
 	if response.ContentLength > 0 || response.ContentLength == -1 {
-		//read the body response
-		b, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			return response, err
-		}
 
 		//unmarshal it depending on StatusCode
 		if response.StatusCode < 300 && successResult != nil {
 			//success
-			err = c.unmarshaler(b, successResult)
+			err = c.unmarshaler(response.Body, successResult)
 		} else if response.StatusCode < 600 && errorResult != nil {
 			//error
-			err = c.unmarshaler(b, errorResult)
+			err = c.unmarshaler(response.Body, errorResult)
 		}
 	}
 
@@ -228,23 +222,25 @@ func (c *client) prepareRequest(
 		c.marshaler = StringMarshalerFunc
 	}
 
-	var readCloserBody []byte
-	if body != nil {
-
-		readCloserBody, err = c.marshaler(body)
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	r, err := http.NewRequest(method, reqUrl.String(), bytes.NewBuffer(readCloserBody))
+	r, err := http.NewRequest(method, reqUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	r.Header = headers
 	r.URL.RawQuery = query.Encode()
+
+	var readLener ReadLener
+	if body != nil {
+
+		readLener, err = c.marshaler(body)
+
+		if err != nil {
+			return nil, err
+		}
+		r.ContentLength = int64(readLener.Len())
+		r.Body = ioutil.NopCloser(readLener)
+	}
 
 	return r, nil
 }
