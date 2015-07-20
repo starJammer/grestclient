@@ -29,16 +29,12 @@ type Client interface {
 	SetQuery(url.Values)
 
 	//SetBaseUrl sets the base url to use for all requests
-	//If you want to use a different base url then you must
+	//If you want to use a different temporarily it is best to
 	//create a new client with the new base url. Call
-	//CloneWithNewBaseUrl( url ) to get a clone of this
-	//client's settings but with a new base url.
-	//An error should be returned if the url is "unsupported",
-	//whatever that may mean.
-	//If you wish to use a username/password combination, set
-	//the userinfo on the url. It will be used during requests.
-	//To use one client with credentials and another without,
-	//use CloneWithNewBaseUrl  and then change the base url.
+	//Clone() to get a clone of this
+	//client's settings and then change the url on the clone.
+	//An error should be returned if the url is "unsupported" by
+	//the implementation. For example, "unix://tmp.soc".
 	//Any query parameters added here should be ignored.
 	//Clients should use the SetQuery method to set default
 	//query parameters
@@ -100,16 +96,18 @@ type Client interface {
 	//Returns the ResponseMutators
 	ResponseMutators() []ResponseMutator
 
-	//Get performs a get request with the base url plus the path appended to it. You can send query values and
-	//supply a successResult that will be populated if the http response has a return code of 300.
+	//Get performs a get request with the base url plus the path appended to it.
+	//You can send query values, header values and
+	//supply a successResult that will be populated if the http response has a return code less than 400.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
 	Get(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Post performs a post request with the base url plus the path appended to it. You can send query values and
-	//supply a successResult that will be populated if the http response has a return code of 300.
+	//Post performs a post request with the base url plus the path appended to it.
+	//You can send query values, header values and
+	//supply a successResult that will be populated if the http response has a return code less than 400.
 	//errorResult is populated if the error code is 400 or more
 	//With post you can also provide a post body.
 	//Returns the raw http.Response and error similar to Do method of http.Client
@@ -117,8 +115,9 @@ type Client interface {
 	//depending on where the operation failed.
 	Post(path string, headers http.Header, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Put performs a put request with the base url plus the path appended to it. You can send query values and
-	//supply a successResult that will be populated if the http response has a return code of 300.
+	//Put performs a put request with the base url plus the path appended to it.
+	//You can send query values, header values and
+	//supply a successResult that will be populated if the http response has a return code less than 400.
 	//errorResult is populated if the error code is 400 or more
 	//With put you can also provide a put body.
 	//Returns the raw http.Response and error similar to Do method of http.Client
@@ -126,8 +125,9 @@ type Client interface {
 	//depending on where the operation failed.
 	Put(path string, headers http.Header, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
-	//Patch performs a patch request with the base url plus the path appended to it. You can send query values and
-	//supply a successResult that will be populated if the http response has a return code of 300.
+	//Patch performs a patch request with the base url plus the path appended to it.
+	//You can send query values, header values and
+	//supply a successResult that will be populated if the http response has a return code less than 400.
 	//errorResult is populated if the error code is 400 or more
 	//With patch you can also provide a patch body.
 	//Returns the raw http.Response and error similar to Do method of http.Client
@@ -136,7 +136,8 @@ type Client interface {
 	Patch(path string, headers http.Header, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
 	//Head performs a head request with the base url plus the path appended to it.
-	//supply a successResult that will be populated if the http response has a return code of 300.
+	//You can send header values and supply a successResult that will be populated
+	//if the http response has a return code less than 400.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
@@ -144,7 +145,8 @@ type Client interface {
 	Head(path string, headers http.Header, successResult interface{}, errorResultg interface{}) (*http.Response, error)
 
 	//Option performs an option request with the base url plus the path appended to it.
-	//supply a successResult that will be populated if the http response has a return code of 300.
+	//You can send header values and supply a successResult that will be populated
+	//if the http response has a return code less than 400.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
@@ -152,7 +154,8 @@ type Client interface {
 	Options(path string, headers http.Header, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
 	//Delete performs an delete request with the base url plus the path appended to it.
-	//supply a successResult that will be populated if the http response has a return code of 300.
+	//You can send header values and supply a successResult that will be populated
+	//if the http response has a return code less than 400.
 	//errorResult is populated if the error code is 400 or more
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
