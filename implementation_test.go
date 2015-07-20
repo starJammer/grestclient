@@ -229,6 +229,7 @@ func TestDeleteMethod(t *testing.T) {
 }
 
 func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
+	var requestCount = 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if req.Method != "GET" {
 			t.Fatal("Expected GET method but got : ", req.Method)
@@ -254,6 +255,14 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 			t.Fatal("multiquery was not 2 values.", query.Encode())
 		}
 
+		requestCount++
+
+		if requestCount == 2 {
+			if _, ok := req.Header["One-Off"]; !ok {
+				t.Fatal("Expected a one off header in the second request.")
+			}
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
@@ -272,6 +281,16 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 	client.Query()["multiquery"] = []string{"test", "test2"}
 
 	res, err := client.Get("get", nil, nil, nil, nil)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if res.StatusCode != 200 {
+		t.Error("Expected a 200 code from the server but got :", res.StatusCode)
+	}
+
+	res, err = client.Get("get", http.Header{"One-Off": []string{"one"}}, nil, nil, nil)
 
 	if err != nil {
 		t.Fatal(err)
