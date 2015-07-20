@@ -106,7 +106,7 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Get(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	Get(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
 	//Post performs a post request with the base url plus the path appended to it. You can send query values and
 	//supply a successResult that will be populated if the http response has a return code of 300.
@@ -115,7 +115,7 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Post(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	Post(path string, headers http.Header, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
 	//Put performs a put request with the base url plus the path appended to it. You can send query values and
 	//supply a successResult that will be populated if the http response has a return code of 300.
@@ -124,7 +124,7 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Put(path string, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	Put(path string, headers http.Header, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
 	//Patch performs a patch request with the base url plus the path appended to it. You can send query values and
 	//supply a successResult that will be populated if the http response has a return code of 300.
@@ -133,7 +133,7 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Patch(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	Patch(path string, headers http.Header, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
 	//Head performs a head request with the base url plus the path appended to it.
 	//supply a successResult that will be populated if the http response has a return code of 300.
@@ -141,7 +141,7 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Head(path string, successResult interface{}, errorResultg interface{}) (*http.Response, error)
+	Head(path string, headers http.Header, successResult interface{}, errorResultg interface{}) (*http.Response, error)
 
 	//Option performs an option request with the base url plus the path appended to it.
 	//supply a successResult that will be populated if the http response has a return code of 300.
@@ -149,7 +149,7 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Options(path string, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	Options(path string, headers http.Header, successResult interface{}, errorResult interface{}) (*http.Response, error)
 
 	//Delete performs an delete request with the base url plus the path appended to it.
 	//supply a successResult that will be populated if the http response has a return code of 300.
@@ -157,7 +157,7 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Delete(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
+	Delete(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error)
 }
 
 type ReadLener interface {

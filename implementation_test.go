@@ -75,7 +75,7 @@ func TestGetMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Get("get", nil, nil, nil)
+	res, err := client.Get("get", nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestPostMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Post("post", nil, nil, nil, nil)
+	res, err := client.Post("post", nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +123,7 @@ func TestPutMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Put("put", nil, nil, nil, nil)
+	res, err := client.Put("put", nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +147,7 @@ func TestPatchMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Patch("patch", nil, nil, nil, nil)
+	res, err := client.Patch("patch", nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestHeadMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Head("head", nil, nil)
+	res, err := client.Head("head", nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +195,7 @@ func TestOptionsMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Options("options", nil, nil)
+	res, err := client.Options("options", nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +219,7 @@ func TestDeleteMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Delete("delete", nil, nil, nil)
+	res, err := client.Delete("delete", nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,7 +271,7 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 	client.Query().Add("testquery", "test")
 	client.Query()["multiquery"] = []string{"test", "test2"}
 
-	res, err := client.Get("get", nil, nil, nil)
+	res, err := client.Get("get", nil, nil, nil, nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -308,8 +308,8 @@ func TestQueryInCallOverridesDefaults(t *testing.T) {
 
 	client.Query().Add("testquery", "test")
 
-	client.Get("get", url.Values{"testquery": []string{"test-override"}}, nil, nil)
-	client.Get("get", nil, nil, nil)
+	client.Get("get", nil, url.Values{"testquery": []string{"test-override"}}, nil, nil)
+	client.Get("get", nil, nil, nil, nil)
 
 }
 
@@ -336,7 +336,7 @@ func TestStringMarshaledBody(t *testing.T) {
 		t.Fatal(err)
 	}
 	var success string
-	res, err := client.Post("post", nil, "hello", &success, nil)
+	res, err := client.Post("post", nil, nil, "hello", &success, nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -367,7 +367,7 @@ func TestErrorResultUnmarshaledOnError(t *testing.T) {
 	}
 	var success string
 	var errResult string
-	res, err := client.Post("post", nil, "hello", &success, &errResult)
+	res, err := client.Post("post", nil, nil, "hello", &success, &errResult)
 
 	if err != nil {
 		t.Fatal(err)
@@ -411,7 +411,7 @@ func TestDumbRequestResponseMutators(t *testing.T) {
 		return nil
 	})
 
-	res, err := client.Post("post", nil, nil, nil, nil)
+	res, err := client.Post("post", nil, nil, nil, nil, nil)
 
 	if err != nil {
 		t.Fatal(err)
@@ -462,7 +462,7 @@ func TestJsonMarshaledBody(t *testing.T) {
 	var body, success, errResult test
 	body.Name = "test"
 
-	_, err = client.Post("post", nil, body, &success, errResult)
+	_, err = client.Post("post", nil, nil, body, &success, errResult)
 
 	if err != nil {
 		t.Fatal(err)
@@ -518,8 +518,8 @@ func TestCloneClient(t *testing.T) {
 	clone.Headers().Set("X-Which", "clone")
 	clone.Query().Set("query", "clone")
 
-	client.Get("", nil, nil, nil)
-	clone.Get("", nil, nil, nil)
+	client.Get("", nil, nil, nil, nil)
+	clone.Get("", nil, nil, nil, nil)
 }
 
 func TestPathIsConcatenated(t *testing.T) {
@@ -537,7 +537,7 @@ func TestPathIsConcatenated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = client.Post("/subpath", nil, nil, nil, nil)
+	_, err = client.Post("/subpath", nil, nil, nil, nil, nil)
 
 	if err != nil {
 		t.Fatal(err)

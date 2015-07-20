@@ -91,56 +91,56 @@ func (c *client) ResponseMutators() []ResponseMutator {
 	return c.resMutators
 }
 
-func (c *client) Get(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("GET", path, query, nil)
+func (c *client) Get(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("GET", path, headers, query, nil)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Post(path string, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("POST", path, query, postBody)
+func (c *client) Post(path string, headers http.Header, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("POST", path, headers, query, postBody)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Put(path string, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("PUT", path, query, putBody)
+func (c *client) Put(path string, headers http.Header, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("PUT", path, headers, query, putBody)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Patch(path string, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("PATCH", path, query, patchBody)
+func (c *client) Patch(path string, headers http.Header, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("PATCH", path, headers, query, patchBody)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Head(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("HEAD", path, nil, nil)
+func (c *client) Head(path string, headers http.Header, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("HEAD", path, headers, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Options(path string, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("OPTIONS", path, nil, nil)
+func (c *client) Options(path string, headers http.Header, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("OPTIONS", path, headers, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Delete(path string, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("DELETE", path, query, nil)
+func (c *client) Delete(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("DELETE", path, headers, query, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -206,6 +206,7 @@ func (c *client) do(r *http.Request, successResult interface{}, errorResult inte
 func (c *client) prepareRequest(
 	method string,
 	path string,
+	headers http.Header,
 	query url.Values,
 	body interface{}) (*http.Request, error) {
 
@@ -214,7 +215,7 @@ func (c *client) prepareRequest(
 	reqUrl.Path += path
 
 	//set headers
-	headers := setupHeaders(c.headers)
+	headers = setupHeaders(c.headers, headers)
 	//create query
 	query = setupQuery(c.query, query)
 
