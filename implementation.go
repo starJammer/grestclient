@@ -188,7 +188,7 @@ func (c *client) do(r *http.Request, successResult interface{}, errorResult inte
 		if response.StatusCode < 300 && successResult != nil {
 			//success
 			err = c.unmarshaler(response.Body, successResult)
-		} else if response.StatusCode < 600 && errorResult != nil {
+		} else if response.StatusCode >= 400 && errorResult != nil {
 			//error
 			err = c.unmarshaler(response.Body, errorResult)
 		}
