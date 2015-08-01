@@ -169,7 +169,12 @@ type Client interface {
 	//Returns the raw http.Response and error similar to Do method of http.Client
 	//The returned http.Response might be non-nil even though an error was also returned
 	//depending on where the operation failed.
-	Head(path string, headers http.Header, successResult interface{}, errorResultg interface{}) (*http.Response, error)
+	Head(
+		path string,
+		headers http.Header,
+		successResult interface{},
+		errorResultg interface{},
+	) (*http.Response, error)
 
 	//Option performs an option request with the base url plus the path appended to it.
 	//You can send header values and supply a successResult that will be populated
