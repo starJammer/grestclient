@@ -195,7 +195,7 @@ func TestOptionsMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Options("options", nil, nil)
+	res, err := client.Options("options", nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

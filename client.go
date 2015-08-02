@@ -186,6 +186,9 @@ type Client interface {
 		path string,
 		headers http.Header,
 		query url.Values,
+		optionsBody interface{},
+		successResult interface{},
+		errorResult interface{},
 	) (*http.Response, error)
 
 	//Delete performs an delete request with the base url plus the path appended to it.

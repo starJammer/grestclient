@@ -131,12 +131,12 @@ func (c *client) Head(path string, headers http.Header, query url.Values) (*http
 	return c.do(r, nil, nil)
 }
 
-func (c *client) Options(path string, headers http.Header, query url.Values) (*http.Response, error) {
-	r, err := c.prepareRequest("OPTIONS", path, headers, query, nil)
+func (c *client) Options(path string, headers http.Header, query url.Values, optionsBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+	r, err := c.prepareRequest("OPTIONS", path, headers, query, optionsBody)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, nil, nil)
+	return c.do(r, successResult, errorResult)
 }
 
 func (c *client) Delete(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
