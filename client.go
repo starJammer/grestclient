@@ -172,8 +172,7 @@ type Client interface {
 	Head(
 		path string,
 		headers http.Header,
-		successResult interface{},
-		errorResultg interface{},
+		query url.Values,
 	) (*http.Response, error)
 
 	//Option performs an option request with the base url plus the path appended to it.
@@ -186,8 +185,7 @@ type Client interface {
 	Options(
 		path string,
 		headers http.Header,
-		successResult interface{},
-		errorResult interface{},
+		query url.Values,
 	) (*http.Response, error)
 
 	//Delete performs an delete request with the base url plus the path appended to it.

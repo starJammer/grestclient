@@ -123,20 +123,20 @@ func (c *client) Patch(path string, headers http.Header, query url.Values, patch
 	return c.do(r, successResult, errorResult)
 }
 
-func (c *client) Head(path string, headers http.Header, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("HEAD", path, headers, nil, nil)
+func (c *client) Head(path string, headers http.Header, query url.Values) (*http.Response, error) {
+	r, err := c.prepareRequest("HEAD", path, headers, query, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, nil, nil)
 }
 
-func (c *client) Options(path string, headers http.Header, successResult interface{}, errorResult interface{}) (*http.Response, error) {
-	r, err := c.prepareRequest("OPTIONS", path, headers, nil, nil)
+func (c *client) Options(path string, headers http.Header, query url.Values) (*http.Response, error) {
+	r, err := c.prepareRequest("OPTIONS", path, headers, query, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, nil, nil)
 }
 
 func (c *client) Delete(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {

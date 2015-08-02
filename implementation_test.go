@@ -171,7 +171,7 @@ func TestHeadMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Head("head", nil, nil, nil)
+	res, err := client.Head("head", nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +195,7 @@ func TestOptionsMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Options("options", nil, nil, nil)
+	res, err := client.Options("options", nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
