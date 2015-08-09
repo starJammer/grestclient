@@ -91,36 +91,36 @@ func (c *client) ResponseMutators() []ResponseMutator {
 	return c.resMutators
 }
 
-func (c *client) Get(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Get(path string, headers http.Header, query url.Values, unmarshalMap UnmarshalMap) (*http.Response, error) {
 	r, err := c.prepareRequest("GET", path, headers, query, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, unmarshalMap)
 }
 
-func (c *client) Post(path string, headers http.Header, query url.Values, postBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Post(path string, headers http.Header, query url.Values, postBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
 	r, err := c.prepareRequest("POST", path, headers, query, postBody)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, unmarshalMap)
 }
 
-func (c *client) Put(path string, headers http.Header, query url.Values, putBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Put(path string, headers http.Header, query url.Values, putBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
 	r, err := c.prepareRequest("PUT", path, headers, query, putBody)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, unmarshalMap)
 }
 
-func (c *client) Patch(path string, headers http.Header, query url.Values, patchBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Patch(path string, headers http.Header, query url.Values, patchBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
 	r, err := c.prepareRequest("PATCH", path, headers, query, patchBody)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, unmarshalMap)
 }
 
 func (c *client) Head(path string, headers http.Header, query url.Values) (*http.Response, error) {
@@ -128,26 +128,26 @@ func (c *client) Head(path string, headers http.Header, query url.Values) (*http
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, nil, nil)
+	return c.do(r, nil)
 }
 
-func (c *client) Options(path string, headers http.Header, query url.Values, optionsBody interface{}, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Options(path string, headers http.Header, query url.Values, optionsBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
 	r, err := c.prepareRequest("OPTIONS", path, headers, query, optionsBody)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, unmarshalMap)
 }
 
-func (c *client) Delete(path string, headers http.Header, query url.Values, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) Delete(path string, headers http.Header, query url.Values, unmarshalMap UnmarshalMap) (*http.Response, error) {
 	r, err := c.prepareRequest("DELETE", path, headers, query, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, successResult, errorResult)
+	return c.do(r, unmarshalMap)
 }
 
-func (c *client) do(r *http.Request, successResult interface{}, errorResult interface{}) (*http.Response, error) {
+func (c *client) do(r *http.Request, unmarshalMap UnmarshalMap) (*http.Response, error) {
 	var err error
 	if c.RequestMutators() != nil {
 		for _, m := range c.RequestMutators() {
@@ -181,21 +181,18 @@ func (c *client) do(r *http.Request, successResult interface{}, errorResult inte
 		c.unmarshaler = StringUnmarshalerFunc
 	}
 
-	//make sure there is a body, or that there might be a body (when it is -1)
-	if response.ContentLength > 0 || response.ContentLength == -1 {
-
-		//unmarshal it depending on StatusCode
-		if response.StatusCode < 300 && successResult != nil {
-			//success
-			err = c.unmarshaler(response.Body, successResult)
-		} else if response.StatusCode >= 400 && errorResult != nil {
-			//error
-			err = c.unmarshaler(response.Body, errorResult)
+	if unmarshalMap != nil {
+		//make sure there is a body, or that there might be a body (when it is -1)
+		if response.ContentLength > 0 || response.ContentLength == -1 {
+			//unmarshal it depending on StatusCode
+			if destination, ok := unmarshalMap[response.StatusCode]; ok && destination != nil {
+				err = c.unmarshaler(response.Body, destination)
+			}
 		}
 	}
 
 	if err != nil {
-		//we have the response so return it even though unmarshaling might've
+		//we have the http response so return it even though unmarshaling might've
 		//produced an error
 		return response, err
 	}

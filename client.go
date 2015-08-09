@@ -107,8 +107,7 @@ type Client interface {
 		path string,
 		headers http.Header,
 		query url.Values,
-		successResult interface{},
-		errorResult interface{},
+		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
 
 	//Post performs a post request with the base url plus the path appended to it.
@@ -124,8 +123,7 @@ type Client interface {
 		headers http.Header,
 		query url.Values,
 		postBody interface{},
-		successResult interface{},
-		errorResult interface{},
+		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
 
 	//Put performs a put request with the base url plus the path appended to it.
@@ -141,8 +139,7 @@ type Client interface {
 		headers http.Header,
 		query url.Values,
 		putBody interface{},
-		successResult interface{},
-		errorResult interface{},
+		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
 
 	//Patch performs a patch request with the base url plus the path appended to it.
@@ -158,8 +155,7 @@ type Client interface {
 		headers http.Header,
 		query url.Values,
 		patchBody interface{},
-		successResult interface{},
-		errorResult interface{},
+		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
 
 	//Head performs a head request with the base url plus the path appended to it.
@@ -187,8 +183,7 @@ type Client interface {
 		headers http.Header,
 		query url.Values,
 		optionsBody interface{},
-		successResult interface{},
-		errorResult interface{},
+		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
 
 	//Delete performs an delete request with the base url plus the path appended to it.
@@ -202,9 +197,25 @@ type Client interface {
 		path string,
 		headers http.Header,
 		query url.Values,
-		successResult interface{},
-		errorResult interface{},
+		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
+}
+
+//UnmarshalMap represents a mapping from HTTP status
+//codes to interfaces that a client should unmarshal
+//to.
+//For example, you call
+//Get( path, headers, query, Unmarshalap{ 200 : success, 201 : someothersuccess, 202 : success, 404 : uauthorizedPiece }
+//If the http response is either a 202 or a 200 then the response body is unmarshaled into success.
+//A 201 response unmarshals into someothersuccess, and a 404 unmarshals into unauthorizedPiece
+type UnmarshalMap map[int]interface{}
+
+func (u UnmarshalMap) SetDestination(status int, destination interface{}) {
+	u[status] = destination
+}
+
+func (u UnmarshalMap) ClearDestination(status int) {
+	delete(u, status)
 }
 
 type ReadLener interface {
