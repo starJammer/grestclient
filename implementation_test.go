@@ -60,6 +60,24 @@ func TestTextMarshalers(t *testing.T) {
 	}
 }
 
+func TestNoServer(t *testing.T) {
+
+	base, err := url.Parse("http://127.0.0.1:9999")
+	client, err := New(base)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := client.Get("get", nil, nil, nil)
+	if err == nil {
+		t.Fatal("Expected some error for there being no server.")
+	}
+	if res != nil {
+		t.Fatal("Expected response to be nil.")
+	}
+}
+
 func TestGetMethod(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
