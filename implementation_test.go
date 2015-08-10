@@ -355,7 +355,7 @@ func TestStringMarshaledBody(t *testing.T) {
 		t.Fatal(err)
 	}
 	var success string
-	res, err := client.Post("post", nil, nil, "hello", UnmarshalMap{200: &success})
+	res, err := client.Post("post", nil, nil, "hello", UnmarshalMap{200: UnmarshalList(&success)})
 
 	if err != nil {
 		t.Fatal(err)
@@ -386,7 +386,16 @@ func TestErrorResultUnmarshaledOnError(t *testing.T) {
 	}
 	var success string
 	var errResult string
-	res, err := client.Post("post", nil, nil, "hello", UnmarshalMap{200: &success, http.StatusNotFound: &errResult})
+	res, err := client.Post(
+		"post",
+		nil,
+		nil,
+		"hello",
+		UnmarshalMap{
+			200:                 []interface{}{&success},
+			http.StatusNotFound: UnmarshalList(&errResult),
+		},
+	)
 
 	if err != nil {
 		t.Fatal(err)
@@ -481,7 +490,12 @@ func TestJsonMarshaledBody(t *testing.T) {
 	var body, success, errResult test
 	body.Name = "test"
 
-	_, err = client.Post("post", nil, nil, body, UnmarshalMap{200: &success, http.StatusNotFound: errResult})
+	_, err = client.Post("post", nil, nil, body,
+		UnmarshalMap{
+			200:                 UnmarshalList(&success),
+			http.StatusNotFound: UnmarshalList(errResult),
+		},
+	)
 
 	if err != nil {
 		t.Fatal(err)

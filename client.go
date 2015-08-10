@@ -205,17 +205,13 @@ type Client interface {
 //codes to interfaces that a client should unmarshal
 //to.
 //For example, you call
-//Get( path, headers, query, Unmarshalap{ 200 : success, 201 : someothersuccess, 202 : success, 404 : uauthorizedPiece }
+//Get( path, headers, query, UnmarshalMap{ 200 : success, 201 : someothersuccess, 202 : success, 404 : uauthorizedPiece }
 //If the http response is either a 202 or a 200 then the response body is unmarshaled into success.
 //A 201 response unmarshals into someothersuccess, and a 404 unmarshals into unauthorizedPiece
-type UnmarshalMap map[int]interface{}
+type UnmarshalMap map[int][]interface{}
 
-func (u UnmarshalMap) SetDestination(status int, destination interface{}) {
-	u[status] = destination
-}
-
-func (u UnmarshalMap) ClearDestination(status int) {
-	delete(u, status)
+func UnmarshalList(h ...interface{}) []interface{} {
+	return h
 }
 
 type ReadLener interface {

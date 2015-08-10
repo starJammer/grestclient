@@ -185,8 +185,10 @@ func (c *client) do(r *http.Request, unmarshalMap UnmarshalMap) (*http.Response,
 		//make sure there is a body, or that there might be a body (when it is -1)
 		if response.ContentLength > 0 || response.ContentLength == -1 {
 			//unmarshal it depending on StatusCode
-			if destination, ok := unmarshalMap[response.StatusCode]; ok && destination != nil {
-				err = c.unmarshaler(response.Body, destination)
+			if destinations, ok := unmarshalMap[response.StatusCode]; ok && destinations != nil {
+				for _, dest := range destinations {
+					err = c.unmarshaler(response.Body, dest)
+				}
 			}
 		}
 	}
