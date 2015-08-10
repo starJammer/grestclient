@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	rt "reflect"
@@ -214,6 +213,11 @@ func UnmarshalList(h ...interface{}) []interface{} {
 	return h
 }
 
+//ReadLener is an io.Reader than can
+//tell you the length of its content.
+//Len can either be 0 for no bytes,
+//-1 for an unknown number of bytes,
+//or >0 for a specific number of bytes.
 type ReadLener interface {
 	io.Reader
 	Len() int
@@ -221,17 +225,25 @@ type ReadLener interface {
 
 //MarshalerFunc takes something and converts it into a
 //ReadLener that can be used for the request body
+//I made ReadLener because ContentLength needs to be set
+//to something in the http.Request. Your Len method can return 0 or -1 if you
+//want but some APIs depend on the ContentLength being set correctly and accurately.
+//bytes.Buffers is already a ReadLener, it has Read and Len methods
+//so no worries there.
+//I ran into issues with the ArangoDB REST API where it failed
+//to answer requests properly if ContentLength was -1 or if it was
+//not correct/accurate.
 type MarshalerFunc func(v interface{}) (ReadLener, error)
 
 //UnmarshalerFunc takes the response body and converts it into
 //something you can use.
-type UnmarshalerFunc func(b io.ReadCloser, v interface{}) error
+type UnmarshalerFunc func(b []byte, v interface{}) error
 
 //ByteSliceToReadCloser takes a byte slice and converts it to an
 //ReadLener that can be used as a request/resonse body
 func ByteSliceToReadLener(b []byte) (ReadLener, error) {
 	if b == nil {
-		return nil, errors.New("ReadCloserFromByteSlice received a nil byte slice.")
+		return nil, errors.New("ByteSliceToReadLener received a nil byte slice.")
 	}
 
 	buf := bytes.NewBuffer(b)
@@ -261,14 +273,9 @@ func JsonMarshalerFunc(v interface{}) (ReadLener, error) {
 
 //JsonUnmarshalerFunc can be used to unmarshal response bodies
 //from json
-func JsonUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
+func JsonUnmarshalerFunc(b []byte, v interface{}) error {
 
-	b, err := ioutil.ReadAll(body)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(b, v)
+	err := json.Unmarshal(b, v)
 
 	if err != nil {
 		return err
@@ -290,16 +297,7 @@ func StringMarshalerFunc(v interface{}) (ReadLener, error) {
 }
 
 //StringUnmarshalerFunc can be used to unmarshal strings from a response.
-func StringUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
-	if v == nil {
-		return nil
-	}
-
-	b, err := ioutil.ReadAll(body)
-
-	if err != nil {
-		return err
-	}
+func StringUnmarshalerFunc(b []byte, v interface{}) error {
 
 	switch v.(type) {
 	case *string:
@@ -310,7 +308,7 @@ func StringUnmarshalerFunc(body io.ReadCloser, v interface{}) error {
 			return nil
 		}
 	case string:
-		return errors.New("You must pass the string by reference: ")
+		return errors.New("You must pass the string by reference or pass a pointer. For example, ( &stringVar )")
 	}
 
 	return errors.New("Did not know how to unmarshal the text coming back.")

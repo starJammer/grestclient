@@ -42,7 +42,8 @@ func TestTextMarshalers(t *testing.T) {
 		t.Fatal(err)
 	}
 	var result string
-	err = StringUnmarshalerFunc(ioutil.NopCloser(r), &result)
+	b, _ := ioutil.ReadAll(r)
+	err = StringUnmarshalerFunc(b, &result)
 
 	if err != nil {
 		t.Fatal(err)
@@ -53,7 +54,7 @@ func TestTextMarshalers(t *testing.T) {
 	}
 
 	//passing by value doesn't work
-	err = StringUnmarshalerFunc(ioutil.NopCloser(r), result)
+	err = StringUnmarshalerFunc(b, result)
 	if err == nil {
 		t.Fatal("Expected error about passing by value instead of reference.")
 	}

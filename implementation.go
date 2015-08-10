@@ -186,8 +186,12 @@ func (c *client) do(r *http.Request, unmarshalMap UnmarshalMap) (*http.Response,
 		if response.ContentLength > 0 || response.ContentLength == -1 {
 			//unmarshal it depending on StatusCode
 			if destinations, ok := unmarshalMap[response.StatusCode]; ok && destinations != nil {
+				body, err := ioutil.ReadAll(response.Body)
+				if err != nil {
+					return response, err
+				}
 				for _, dest := range destinations {
-					err = c.unmarshaler(response.Body, dest)
+					err = c.unmarshaler(body, dest)
 				}
 			}
 		}
