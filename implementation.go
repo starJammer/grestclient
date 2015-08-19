@@ -185,14 +185,12 @@ func (c *client) do(r *http.Request, unmarshalMap UnmarshalMap) (*http.Response,
 		//make sure there is a body, or that there might be a body (when it is -1)
 		if response.ContentLength > 0 || response.ContentLength == -1 {
 			//unmarshal it depending on StatusCode
-			if destinations, ok := unmarshalMap[response.StatusCode]; ok && destinations != nil {
+			if destination, ok := unmarshalMap[response.StatusCode]; ok && destination != nil {
 				body, err := ioutil.ReadAll(response.Body)
 				if err != nil {
 					return response, err
 				}
-				for _, dest := range destinations {
-					err = c.unmarshaler(body, dest)
-				}
+				err = c.unmarshaler(body, destination)
 			}
 		}
 	}

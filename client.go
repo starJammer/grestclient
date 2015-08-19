@@ -207,11 +207,7 @@ type Client interface {
 //Get( path, headers, query, UnmarshalMap{ 200 : success, 201 : someothersuccess, 202 : success, 404 : uauthorizedPiece }
 //If the http response is either a 202 or a 200 then the response body is unmarshaled into success.
 //A 201 response unmarshals into someothersuccess, and a 404 unmarshals into unauthorizedPiece
-type UnmarshalMap map[int][]interface{}
-
-func UnmarshalList(h ...interface{}) []interface{} {
-	return h
-}
+type UnmarshalMap map[int]interface{}
 
 //ReadLener is an io.Reader than can
 //tell you the length of its content.
