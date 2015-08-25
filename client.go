@@ -42,7 +42,8 @@ type Client interface {
 	//BaseUrl returns the base url being used. This implementation
 	//allows you to change the base url here directly but other
 	//implementations might give you a clone so changing it won't affect
-	//the client. In those cases, use SetBaseUrl to change the url.
+	//the client. In those cases, use SetBaseUrl to change the url after
+	//making your changes.
 	BaseUrl() *url.URL
 
 	//Clones the client with everything the old client had
@@ -95,6 +96,18 @@ type Client interface {
 	//Returns the ResponseMutators
 	ResponseMutators() []ResponseMutator
 
+	Getter
+	Poster
+	Putter
+	Patcher
+	Header
+	Optioner
+	Deleter
+}
+
+//Getter is something capable of performing
+//a get on a given url path.
+type Getter interface {
 	//Get performs a get request with the base url plus the path appended to it.
 	//You can send query values, header values and
 	//supply a successResult that will be populated if the http response has a return code less than 400.
@@ -108,7 +121,11 @@ type Client interface {
 		query url.Values,
 		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
+}
 
+//Poster is something capable of performing
+//a get on a given url path.
+type Poster interface {
 	//Post performs a post request with the base url plus the path appended to it.
 	//You can send query values, header values and
 	//supply a successResult that will be populated if the http response has a return code less than 400.
@@ -124,7 +141,11 @@ type Client interface {
 		postBody interface{},
 		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
+}
 
+//Putter is something capable of performing
+//a get on a given url path.
+type Putter interface {
 	//Put performs a put request with the base url plus the path appended to it.
 	//You can send query values, header values and
 	//supply a successResult that will be populated if the http response has a return code less than 400.
@@ -140,7 +161,11 @@ type Client interface {
 		putBody interface{},
 		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
+}
 
+//Patcher is something capable of performing
+//a get on a given url path.
+type Patcher interface {
 	//Patch performs a patch request with the base url plus the path appended to it.
 	//You can send query values, header values and
 	//supply a successResult that will be populated if the http response has a return code less than 400.
@@ -156,7 +181,11 @@ type Client interface {
 		patchBody interface{},
 		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
+}
 
+//Header is something capable of performing
+//a get on a given url path.
+type Header interface {
 	//Head performs a head request with the base url plus the path appended to it.
 	//You can send header values and supply a successResult that will be populated
 	//if the http response has a return code less than 400.
@@ -169,7 +198,11 @@ type Client interface {
 		headers http.Header,
 		query url.Values,
 	) (*http.Response, error)
+}
 
+//Optioner is something capable of performing
+//a get on a given url path.
+type Optioner interface {
 	//Option performs an option request with the base url plus the path appended to it.
 	//You can send header values and supply a successResult that will be populated
 	//if the http response has a return code less than 400.
@@ -184,7 +217,11 @@ type Client interface {
 		optionsBody interface{},
 		unmarshalMap UnmarshalMap,
 	) (*http.Response, error)
+}
 
+//Deleter is something capable of performing
+//a get on a given url path.
+type Deleter interface {
 	//Delete performs an delete request with the base url plus the path appended to it.
 	//You can send header values and supply a successResult that will be populated
 	//if the http response has a return code less than 400.
