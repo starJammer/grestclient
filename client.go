@@ -105,8 +105,8 @@ type Client interface {
 	Deleter
 }
 
-//Getter is something capable of performing
-//a get on a given url path.
+//Getter is something capable of performing an HTTP GET
+//on a given url path.
 type Getter interface {
 	//Get performs a get request with the base url plus the path appended to it.
 	//You can send query values, header values and
@@ -123,8 +123,8 @@ type Getter interface {
 	) (*http.Response, error)
 }
 
-//Poster is something capable of performing
-//a get on a given url path.
+//Poster is something capable of performing an HTTP POST
+//on a given url path.
 type Poster interface {
 	//Post performs a post request with the base url plus the path appended to it.
 	//You can send query values, header values and
@@ -143,8 +143,8 @@ type Poster interface {
 	) (*http.Response, error)
 }
 
-//Putter is something capable of performing
-//a get on a given url path.
+//Putter is something capable of performing an HTTP PUT
+//on a given url path.
 type Putter interface {
 	//Put performs a put request with the base url plus the path appended to it.
 	//You can send query values, header values and
@@ -163,8 +163,8 @@ type Putter interface {
 	) (*http.Response, error)
 }
 
-//Patcher is something capable of performing
-//a get on a given url path.
+//Patcher is something capable of performing an HTTP PATCH
+//on a given url path.
 type Patcher interface {
 	//Patch performs a patch request with the base url plus the path appended to it.
 	//You can send query values, header values and
@@ -183,8 +183,8 @@ type Patcher interface {
 	) (*http.Response, error)
 }
 
-//Header is something capable of performing
-//a get on a given url path.
+//Header is something capable of performing an HTTP HEAD
+//on a given url path.
 type Header interface {
 	//Head performs a head request with the base url plus the path appended to it.
 	//You can send header values and supply a successResult that will be populated
@@ -200,8 +200,8 @@ type Header interface {
 	) (*http.Response, error)
 }
 
-//Optioner is something capable of performing
-//a get on a given url path.
+//Optioner is something capable of performing an HTTP OPTIONS
+//on a given url path.
 type Optioner interface {
 	//Option performs an option request with the base url plus the path appended to it.
 	//You can send header values and supply a successResult that will be populated
@@ -219,8 +219,8 @@ type Optioner interface {
 	) (*http.Response, error)
 }
 
-//Deleter is something capable of performing
-//a get on a given url path.
+//Deleter is something capable of performing an HTTP DELETE
+//on a given url path.
 type Deleter interface {
 	//Delete performs an delete request with the base url plus the path appended to it.
 	//You can send header values and supply a successResult that will be populated
