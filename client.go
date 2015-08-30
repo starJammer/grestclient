@@ -406,7 +406,7 @@ func (c *Client) do(r *http.Request, unmarshalMap UnmarshalMap) (*http.Response,
 		}
 	}
 	var response *http.Response
-	client := c.GetHttpClient()
+	client := c.GetHttpDoer()
 
 	response, err = client.Do(r)
 
@@ -541,17 +541,21 @@ func queryCopy(q url.Values) url.Values {
 
 //GetHttpClient returns the current http.Client being used
 //If none has been set, this should return http.DefaultClient
-func (c *Client) GetHttpClient() *http.Client {
+func (c *Client) GetHttpDoer() HttpDoer {
 	if c.client == nil {
 		c.client = http.DefaultClient
 	}
 	return c.client
 }
 
+type HttpDoer interface {
+	Do(r *http.Request) (*http.Response, error)
+}
+
 //SetHttpClient sets the http.Client to use during requests
 //Use this to customize your http.Client as you wish. If you
 //don't set one, the default http.Client will be used.
-func (c *Client) SetHttpClient(h *http.Client) {
+func (c *Client) SetHttpDoer(h *http.Client) {
 	c.client = h
 }
 
