@@ -26,6 +26,18 @@ type Client struct {
 	unmarshaler UnmarshalerFunc
 }
 
+//Request represents a single request that can be made
+//with the Client's Do method.
+type Request struct {
+	Path    string
+	Headers http.Header
+	Query   url.Values
+	//Body is ignored by GET, HEAD and other methods that don't typically
+	//have a body
+	Body         interface{}
+	UnmarshalMap UnmarshalMap
+}
+
 //Headers returns the default headers that will
 //be set with every request made with the client.
 func (c *Client) Headers() http.Header {
@@ -154,12 +166,12 @@ func (c *Client) ResponseMutators() []ResponseMutator {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Get(path string, headers http.Header, query url.Values, unmarshalMap UnmarshalMap) (*http.Response, error) {
-	r, err := c.prepareRequest("GET", path, headers, query, nil)
+func (c *Client) Get(req *Request) (*http.Response, error) {
+	r, err := c.prepareRequest("GET", req.Path, req.Headers, req.Query, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, unmarshalMap)
+	return c.do(r, req.UnmarshalMap)
 }
 
 //Post performs a post request with the base url plus the path appended to it.
@@ -170,12 +182,12 @@ func (c *Client) Get(path string, headers http.Header, query url.Values, unmarsh
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Post(path string, headers http.Header, query url.Values, postBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
-	r, err := c.prepareRequest("POST", path, headers, query, postBody)
+func (c *Client) Post(req *Request) (*http.Response, error) {
+	r, err := c.prepareRequest("POST", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, unmarshalMap)
+	return c.do(r, req.UnmarshalMap)
 }
 
 //Put performs a put request with the base url plus the path appended to it.
