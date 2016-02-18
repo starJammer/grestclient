@@ -142,7 +142,7 @@ func TestPutMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Put("put", nil, nil, nil, nil)
+	res, err := client.Put(&Request{Path: "put"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func TestPatchMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Patch("patch", nil, nil, nil, nil)
+	res, err := client.Patch(&Request{Path: "patch"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func TestHeadMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Head("head", nil, nil)
+	res, err := client.Head(&Request{Path: "head"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -214,7 +214,7 @@ func TestOptionsMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Options("options", nil, nil, nil, nil)
+	res, err := client.Options(&Request{Path: "options"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,7 +238,7 @@ func TestDeleteMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Delete("delete", nil, nil, nil)
+	res, err := client.Delete(&Request{Path: "delete"})
 	if err != nil {
 		t.Fatal(err)
 	}

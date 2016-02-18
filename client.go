@@ -27,7 +27,7 @@ type Client struct {
 }
 
 //Request represents a single request that can be made
-//with the Client's Do method.
+//with the Client's Get/Post/Delete/Put/Options/Head method.
 type Request struct {
 	Path    string
 	Headers http.Header
@@ -198,12 +198,12 @@ func (c *Client) Post(req *Request) (*http.Response, error) {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Put(path string, headers http.Header, query url.Values, putBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
-	r, err := c.prepareRequest("PUT", path, headers, query, putBody)
+func (c *Client) Put(req *Request) (*http.Response, error) {
+	r, err := c.prepareRequest("PUT", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, unmarshalMap)
+	return c.do(r, req.UnmarshalMap)
 }
 
 //Patch performs a patch request with the base url plus the path appended to it.
@@ -214,12 +214,12 @@ func (c *Client) Put(path string, headers http.Header, query url.Values, putBody
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Patch(path string, headers http.Header, query url.Values, patchBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
-	r, err := c.prepareRequest("PATCH", path, headers, query, patchBody)
+func (c *Client) Patch(req *Request) (*http.Response, error) {
+	r, err := c.prepareRequest("PATCH", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, unmarshalMap)
+	return c.do(r, req.UnmarshalMap)
 }
 
 //Head performs a head request with the base url plus the path appended to it.
@@ -229,8 +229,8 @@ func (c *Client) Patch(path string, headers http.Header, query url.Values, patch
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Head(path string, headers http.Header, query url.Values) (*http.Response, error) {
-	r, err := c.prepareRequest("HEAD", path, headers, query, nil)
+func (c *Client) Head(req *Request) (*http.Response, error) {
+	r, err := c.prepareRequest("HEAD", req.Path, req.Headers, req.Query, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -244,12 +244,12 @@ func (c *Client) Head(path string, headers http.Header, query url.Values) (*http
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Options(path string, headers http.Header, query url.Values, optionsBody interface{}, unmarshalMap UnmarshalMap) (*http.Response, error) {
-	r, err := c.prepareRequest("OPTIONS", path, headers, query, optionsBody)
+func (c *Client) Options(req *Request) (*http.Response, error) {
+	r, err := c.prepareRequest("OPTIONS", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, unmarshalMap)
+	return c.do(r, req.UnmarshalMap)
 }
 
 //Delete performs an delete request with the base url plus the path appended to it.
@@ -259,12 +259,12 @@ func (c *Client) Options(path string, headers http.Header, query url.Values, opt
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Delete(path string, headers http.Header, query url.Values, unmarshalMap UnmarshalMap) (*http.Response, error) {
-	r, err := c.prepareRequest("DELETE", path, headers, query, nil)
+func (c *Client) Delete(req *Request) (*http.Response, error) {
+	r, err := c.prepareRequest("DELETE", req.Path, req.Headers, req.Query, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, unmarshalMap)
+	return c.do(r, req.UnmarshalMap)
 }
 
 //UnmarshalMap represents a mapping from HTTP status
