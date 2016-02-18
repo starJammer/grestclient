@@ -26,9 +26,9 @@ type Client struct {
 	unmarshaler UnmarshalerFunc
 }
 
-//Request represents a single request that can be made
-//with the Client's Get/Post/Delete/Put/Options/Head method.
-type Request struct {
+//Params represents a parameters you can pass to be used when
+//during the requests made by grestclient.
+type Params struct {
 	Path    string
 	Headers http.Header
 	Query   url.Values
@@ -166,7 +166,7 @@ func (c *Client) ResponseMutators() []ResponseMutator {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Get(req *Request) (*http.Response, error) {
+func (c *Client) Get(req *Params) (*http.Response, error) {
 	r, err := c.prepareRequest("GET", req.Path, req.Headers, req.Query, nil)
 	if err != nil {
 		return nil, err
@@ -182,7 +182,7 @@ func (c *Client) Get(req *Request) (*http.Response, error) {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Post(req *Request) (*http.Response, error) {
+func (c *Client) Post(req *Params) (*http.Response, error) {
 	r, err := c.prepareRequest("POST", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (c *Client) Post(req *Request) (*http.Response, error) {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Put(req *Request) (*http.Response, error) {
+func (c *Client) Put(req *Params) (*http.Response, error) {
 	r, err := c.prepareRequest("PUT", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
@@ -214,7 +214,7 @@ func (c *Client) Put(req *Request) (*http.Response, error) {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Patch(req *Request) (*http.Response, error) {
+func (c *Client) Patch(req *Params) (*http.Response, error) {
 	r, err := c.prepareRequest("PATCH", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
@@ -229,7 +229,7 @@ func (c *Client) Patch(req *Request) (*http.Response, error) {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Head(req *Request) (*http.Response, error) {
+func (c *Client) Head(req *Params) (*http.Response, error) {
 	r, err := c.prepareRequest("HEAD", req.Path, req.Headers, req.Query, nil)
 	if err != nil {
 		return nil, err
@@ -244,7 +244,7 @@ func (c *Client) Head(req *Request) (*http.Response, error) {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Options(req *Request) (*http.Response, error) {
+func (c *Client) Options(req *Params) (*http.Response, error) {
 	r, err := c.prepareRequest("OPTIONS", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
@@ -259,7 +259,7 @@ func (c *Client) Options(req *Request) (*http.Response, error) {
 //Returns the raw http.Response and error similar to Do method of http.Client
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
-func (c *Client) Delete(req *Request) (*http.Response, error) {
+func (c *Client) Delete(req *Params) (*http.Response, error) {
 	r, err := c.prepareRequest("DELETE", req.Path, req.Headers, req.Query, nil)
 	if err != nil {
 		return nil, err

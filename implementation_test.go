@@ -69,7 +69,7 @@ func TestNoServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Get(&Request{Path: "get"})
+	res, err := client.Get(&Params{Path: "get"})
 	if err == nil {
 		t.Fatal("Expected some error for there being no server.")
 	}
@@ -94,7 +94,7 @@ func TestGetMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Get(&Request{Path: "get"})
+	res, err := client.Get(&Params{Path: "get"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestPostMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Post(&Request{Path: "post"})
+	res, err := client.Post(&Params{Path: "post"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +142,7 @@ func TestPutMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Put(&Request{Path: "put"})
+	res, err := client.Put(&Params{Path: "put"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func TestPatchMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Patch(&Request{Path: "patch"})
+	res, err := client.Patch(&Params{Path: "patch"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func TestHeadMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Head(&Request{Path: "head"})
+	res, err := client.Head(&Params{Path: "head"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -214,7 +214,7 @@ func TestOptionsMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Options(&Request{Path: "options"})
+	res, err := client.Options(&Params{Path: "options"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,7 +238,7 @@ func TestDeleteMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := client.Delete(&Request{Path: "delete"})
+	res, err := client.Delete(&Params{Path: "delete"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -299,7 +299,7 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 	client.Query().Add("testquery", "test")
 	client.Query()["multiquery"] = []string{"test", "test2"}
 
-	res, err := client.Get(&Request{Path: "get"})
+	res, err := client.Get(&Params{Path: "get"})
 
 	if err != nil {
 		t.Fatal(err)
@@ -309,7 +309,7 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 		t.Error("Expected a 200 code from the server but got :", res.StatusCode)
 	}
 
-	res, err = client.Get(&Request{
+	res, err = client.Get(&Params{
 		Path:    "get",
 		Headers: http.Header{"One-Off": []string{"one"}},
 	})
@@ -349,11 +349,11 @@ func TestQueryInCallOverridesDefaults(t *testing.T) {
 
 	client.Query().Add("testquery", "test")
 
-	client.Get(&Request{
+	client.Get(&Params{
 		Path:  "get",
 		Query: url.Values{"testquery": []string{"test-override"}},
 	})
-	client.Get(&Request{Path: "get"})
+	client.Get(&Params{Path: "get"})
 
 }
 
@@ -380,7 +380,7 @@ func TestStringMarshaledBody(t *testing.T) {
 		t.Fatal(err)
 	}
 	var success string
-	res, err := client.Post(&Request{
+	res, err := client.Post(&Params{
 		Path:         "post",
 		Body:         "hello",
 		UnmarshalMap: UnmarshalMap{200: &success},
@@ -415,7 +415,7 @@ func TestErrorResultUnmarshaledOnError(t *testing.T) {
 	}
 	var success string
 	var errResult string
-	res, err := client.Post(&Request{
+	res, err := client.Post(&Params{
 		Path: "post",
 		Body: "hello",
 		UnmarshalMap: UnmarshalMap{
@@ -466,7 +466,7 @@ func TestDumbRequestResponseMutators(t *testing.T) {
 		return nil
 	})
 
-	res, err := client.Post(&Request{Path: "post"})
+	res, err := client.Post(&Params{Path: "post"})
 
 	if err != nil {
 		t.Fatal(err)
@@ -517,7 +517,7 @@ func TestJsonMarshaledBody(t *testing.T) {
 	var body, success, errResult test
 	body.Name = "test"
 
-	_, err = client.Post(&Request{
+	_, err = client.Post(&Params{
 		Path: "post",
 		Body: body,
 		UnmarshalMap: UnmarshalMap{
@@ -580,8 +580,8 @@ func TestCloneClient(t *testing.T) {
 	clone.Headers().Set("X-Which", "clone")
 	clone.Query().Set("query", "clone")
 
-	client.Get(&Request{Path: ""})
-	clone.Get(&Request{Path: ""})
+	client.Get(&Params{Path: ""})
+	clone.Get(&Params{Path: ""})
 }
 
 func TestPathIsConcatenated(t *testing.T) {
@@ -599,7 +599,7 @@ func TestPathIsConcatenated(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = client.Post(&Request{Path: "/subpath"})
+	_, err = client.Post(&Params{Path: "/subpath"})
 
 	if err != nil {
 		t.Fatal(err)
