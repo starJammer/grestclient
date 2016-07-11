@@ -67,14 +67,14 @@ func (c *Client) SetQuery(q url.Values) {
 }
 
 //SetBaseUrl sets the base url to use for all requests
-//If you want to use a different temporarily it is best to
+//If you want to use a different url temporarily it is best to
 //create a new client with the new base url. Call
 //Clone() to get a clone of this
 //client's settings and then change the url on the clone.
 //An error should be returned if the url is "unsupported" by
 //the implementation. For example, "unix://tmp.soc".
-//Any query parameters added here should be ignored.
-//Clients should use the SetQuery method to set default
+//Any query parameters added here will be ignored.
+//Use the SetQuery method to set default
 //query parameters
 func (c *Client) SetBaseUrl(u *url.URL) error {
 	if u == nil {
@@ -85,19 +85,13 @@ func (c *Client) SetBaseUrl(u *url.URL) error {
 	return nil
 }
 
-//BaseUrl returns the base url being used. This implementation
-//allows you to change the base url here directly but other
-//implementations might give you a clone so changing it won't affect
-//the client. In those cases, use SetBaseUrl to change the url after
-//making your changes.
+//BaseUrl returns the base url being used.
 func (c *Client) BaseUrl() *url.URL {
 	return c.base
 }
 
 //Clones the client with everything the old client had
-//Ideally, clones should be independent of the original and can be changed
-//without affecting the original and vice versa.
-//This implementation, however, shared the http.Client among clones.
+//However, the http.Client IS shared among clones.
 //All other 'things' like headers, base url, query, marshalers are separate and
 //can be adjusted without affecting the original/clones.
 func (c *Client) Clone() *Client {
@@ -304,7 +298,7 @@ type MarshalerFunc func(v interface{}) (ReadLener, error)
 //and should unmarshal it into v.
 type UnmarshalerFunc func(b []byte, v interface{}) error
 
-//ByteSliceToReadCloser takes a byte slice and converts it to an
+//ByteSliceToReadCloser takes a []byte and converts it to an
 //ReadLener that can be used as a request/resonse body
 func ByteSliceToReadLener(b []byte) (ReadLener, error) {
 	if b == nil {
@@ -323,7 +317,7 @@ func StringToReadLener(s string) ReadLener {
 }
 
 //JsonMarshalerFunc can be used by the client to marshal
-//request bodies into json.
+//structs into json for the request body.
 func JsonMarshalerFunc(v interface{}) (ReadLener, error) {
 	b, err := json.Marshal(v)
 	if err != nil {
@@ -552,7 +546,7 @@ func queryCopy(q url.Values) url.Values {
 }
 
 //GetHttpClient returns the current http.Client being used
-//If none has been set, this should return http.DefaultClient
+//If none has been set, this will return a http.DefaultClient
 func (c *Client) GetHttpDoer() HttpDoer {
 	if c.client == nil {
 		c.client = http.DefaultClient

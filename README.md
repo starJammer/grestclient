@@ -38,7 +38,7 @@ to wrap them. Not better or worse than `napping` but I went with this out
 of personal feeling.
 3. No direct way of just doing a request yet. So there is no `session.Send`
 equivalent. I've thought of putting it in for letting others have more
-control over the request but I haven't had needed this use case. The 
+control over the request but I haven't needed this use case. The 
 RequestMutator can help you alter a request about to be executed if need.
 
 ## Usage

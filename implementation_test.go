@@ -84,6 +84,10 @@ func TestGetMethod(t *testing.T) {
 		if req.Method != "GET" {
 			t.Fatal("Expected GET but got: ", req.Method)
 		}
+
+		if req.URL.Path != "/get" {
+			t.Fatal("Expected path to be get but got: ", req.URL.Path)
+		}
 	}))
 	defer server.Close()
 
@@ -276,9 +280,15 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 
 		requestCount++
 
+		if requestCount == 1 {
+			if oneOff, ok := req.Header["One-Off"]; !ok || oneOff[0] != "one" {
+				t.Fatal("Expected a one off header in the first request.")
+			}
+		}
+
 		if requestCount == 2 {
-			if _, ok := req.Header["One-Off"]; !ok {
-				t.Fatal("Expected a one off header in the second request.")
+			if _, ok := req.Header["One-Off"]; ok {
+				t.Fatal("Did NOT expect the one off header in the second request.")
 			}
 		}
 
@@ -299,7 +309,10 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 	client.Query().Add("testquery", "test")
 	client.Query()["multiquery"] = []string{"test", "test2"}
 
-	res, err := client.Get(&Params{Path: "get"})
+	res, err := client.Get(&Params{
+		Path:    "get",
+		Headers: http.Header{"One-Off": []string{"one"}},
+	})
 
 	if err != nil {
 		t.Fatal(err)
@@ -310,8 +323,7 @@ func TestDefaultHeaderQueryPassedIntoGetRequest(t *testing.T) {
 	}
 
 	res, err = client.Get(&Params{
-		Path:    "get",
-		Headers: http.Header{"One-Off": []string{"one"}},
+		Path: "get",
 	})
 
 	if err != nil {
