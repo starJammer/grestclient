@@ -261,7 +261,7 @@ func (c *Client) Options(req *Params) (*http.Response, error) {
 //The returned http.Response might be non-nil even though an error was also returned
 //depending on where the operation failed.
 func (c *Client) Delete(req *Params) (*http.Response, error) {
-	r, err := c.prepareRequest("DELETE", req.Path, req.Headers, req.Query, nil)
+	r, err := c.prepareRequest("DELETE", req.Path, req.Headers, req.Query, req.Body)
 	if err != nil {
 		return nil, err
 	}
