@@ -36,6 +36,12 @@ type Params struct {
 	//have a body
 	Body         interface{}
 	UnmarshalMap UnmarshalMap
+
+	//Useful for debugging
+	//Normally the response body in the http.Response returned will be
+	//have been unmarshalled and read. This will make it so that the original
+	//body contents are restored after the unmarshalling
+	Debug bool
 }
 
 //Headers returns the default headers that will
@@ -165,7 +171,7 @@ func (c *Client) Get(req *Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, req.UnmarshalMap)
+	return c.do(r, req)
 }
 
 //Post performs a post request with the base url plus the path appended to it.
@@ -181,7 +187,7 @@ func (c *Client) Post(req *Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, req.UnmarshalMap)
+	return c.do(r, req)
 }
 
 //Put performs a put request with the base url plus the path appended to it.
@@ -197,7 +203,7 @@ func (c *Client) Put(req *Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, req.UnmarshalMap)
+	return c.do(r, req)
 }
 
 //Patch performs a patch request with the base url plus the path appended to it.
@@ -213,7 +219,7 @@ func (c *Client) Patch(req *Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, req.UnmarshalMap)
+	return c.do(r, req)
 }
 
 //Head performs a head request with the base url plus the path appended to it.
@@ -228,7 +234,8 @@ func (c *Client) Head(req *Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, nil)
+	req.UnmarshalMap = nil
+	return c.do(r, req)
 }
 
 //Option performs an option request with the base url plus the path appended to it.
@@ -243,7 +250,7 @@ func (c *Client) Options(req *Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, req.UnmarshalMap)
+	return c.do(r, req)
 }
 
 //Delete performs an delete request with the base url plus the path appended to it.
@@ -258,7 +265,7 @@ func (c *Client) Delete(req *Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.do(r, req.UnmarshalMap)
+	return c.do(r, req)
 }
 
 //UnmarshalMap represents a mapping from HTTP status
@@ -401,7 +408,10 @@ func SetupForJson(c *Client) {
 	c.AddRequestMutators(JsonAcceptMutator)
 }
 
-func (c *Client) do(r *http.Request, unmarshalMap UnmarshalMap) (*http.Response, error) {
+func (c *Client) do(r *http.Request, params *Params) (*http.Response, error) {
+
+	unmarshalMap := params.UnmarshalMap
+
 	var err error
 	if c.RequestMutators() != nil {
 		for _, m := range c.RequestMutators() {
@@ -441,6 +451,13 @@ func (c *Client) do(r *http.Request, unmarshalMap UnmarshalMap) (*http.Response,
 			//unmarshal it depending on StatusCode
 			if destination, ok := unmarshalMap[response.StatusCode]; ok && destination != nil {
 				body, err := ioutil.ReadAll(response.Body)
+
+				//we're debugging so add the body back to the response
+				if params.Debug {
+					r, _ := ByteSliceToReadLener(body)
+					response.Body = ioutil.NopCloser(r)
+				}
+
 				if err != nil {
 					return response, err
 				}
